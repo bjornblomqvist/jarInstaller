@@ -236,19 +236,6 @@ public class JarInstallerTest {
                 });
             });
             
-            context("is called from outside of a jar", () -> {
-                it("should throw an exception", () -> {
-                    JarInstallerException exception = null;
-                    try {
-                        JarInstaller.unInstall(null);
-                    } catch (JarInstallerException ex) {
-                        exception = ex;
-                    }
-                    
-                    assertThat(exception, is(not(equalTo(null))));
-                });
-            });
-            
             context("is called from jar without Main-Class: in manifest", () -> {
                 
                 Variable<String> result = new Variable();
@@ -422,13 +409,6 @@ public class JarInstallerTest {
                
                 it("should return false", () -> {
                    assertThat(result.get(), containsString("false"));
-                });
-            });
-            
-            context("is called in code outside of a jar", () -> {
-               
-                it("should return false", () -> {
-                   assertThat(JarInstaller.isInstalled(null), is(equalTo(false)));
                 });
             });
         });
