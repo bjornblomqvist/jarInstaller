@@ -178,7 +178,7 @@ public class JarInstallerTest {
             tryToDelete(new File(DUMMY_HOME + ".jars/"));
         });
         
-        describe(".unUinstall()", () -> {
+        describe(".unInstall()", () -> {
             context("is called in a jar that has been installed but is not run in the installed jar", () -> {
                
                 Variable<String> result = new Variable();
