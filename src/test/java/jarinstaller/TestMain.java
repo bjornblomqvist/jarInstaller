@@ -2,6 +2,9 @@ package jarinstaller;
 
 import static jarinstaller.JarInstaller.getJarPathFor;
 
+/**
+ * Used to test parts of the API that is only relevant from within a jar.
+ */
 public class TestMain {
     public static void main(String[] args) throws JarInstallerException {
         System.setProperty("user.home", System.getenv("HOME"));

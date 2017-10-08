@@ -18,6 +18,9 @@ you wish to install.
 
 ## Install command line tool
 
-    curl -O central.maven.org/maven2/org/jarinstall/jarinstaller/1.0.0/jarInstaller-1.0.0.jar
+    git clone git@github.com:bjornblomqvist/jarInstaller.git
+    cd jarInstaller
+    mvn package
+
+    java -jar target/jarinstaller-0.1.0-SNAPSHOT.jar --install --add-to-path
     
-    java -jar jarInstaller-1.0.0.jar --install --add-to-path

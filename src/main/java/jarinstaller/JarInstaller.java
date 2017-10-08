@@ -1,9 +1,11 @@
 package jarinstaller;
 
 import jarinstaller.impl.Utils;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -15,8 +17,12 @@ import java.util.Set;
 public class JarInstaller {
     
     public static boolean unInstall(Path jarPath) throws JarInstallerException {
+        return unInstall(jarPath, new PrintStream(new ByteArrayOutputStream()));
+    }
+    
+    public static boolean unInstall(Path jarPath, PrintStream printStream) throws JarInstallerException {
         if (!jarPath.toString().endsWith(".jar")) {
-            throw new JarInstallerException("Could not find jar to install");
+            throw new JarInstallerException("Could not find jar to uninstall");
         }
         
         File targetDir = new File("~/.jars/jars/".replaceFirst("^~",System.getProperty("user.home")));
@@ -25,11 +31,15 @@ public class JarInstaller {
         String targetBashScript = targetBinDir.toPath().resolve(jarPath.getFileName().toString().split("\\.")[0]).toString();
         
         if (!Files.exists(targetPath)) {
+            printStream.println("There is no " + jarPath.getFileName() + " in ~/.jars/jars/");
             return false;
         }
         
         try {
+            printStream.println("Removing ~/.jars/jars/" + jarPath.getFileName());
             Files.delete(targetPath);
+            
+            printStream.println("Removing ~/.jars/bin/" + Paths.get(targetBashScript).getFileName());
             Files.delete(Paths.get(targetBashScript));
         } catch (IOException ioex) {
             throw new JarInstallerException(ioex);
@@ -39,6 +49,10 @@ public class JarInstaller {
     }
     
     public static boolean install(Path jarPath) throws JarInstallerException {
+        return install(jarPath, new PrintStream(new ByteArrayOutputStream()));
+    }
+    
+    public static boolean install(Path jarPath, PrintStream printStream) throws JarInstallerException {
         try {
             if (Files.isDirectory(jarPath) || !Files.exists(jarPath)) {
                 throw new JarInstallerException("Install should only be called from inside a JAR file, path: " + jarPath);
@@ -62,9 +76,13 @@ public class JarInstaller {
             Path targetPath = targetDir.toPath().resolve(jarPath.getFileName());
 
             Files.copy(jarPath, targetPath, StandardCopyOption.REPLACE_EXISTING);
+            printStream.println("Copied " + jarPath + " to ~/.jars/jars/" + jarPath.getFileName());
 
             String targetBashScript = targetBinDir.toPath().resolve(jarPath.getFileName().toString().split("\\.")[0]).toString();
-
+            if (targetBashScript.endsWith("-1")) {
+                targetBashScript = targetBinDir.toPath().resolve(jarPath.getFileName().toString().split("-")[0]).toString();
+            }
+            
             try(FileWriter bashScriptOutputstream = new FileWriter(targetBashScript);) {
                 bashScriptOutputstream.write("#!/bin/bash\n" +
                 "\n" +
@@ -78,6 +96,8 @@ public class JarInstaller {
             Set<PosixFilePermission> perms = Files.getPosixFilePermissions(Paths.get(targetBashScript));
             perms.add(PosixFilePermission.OWNER_EXECUTE);
             Files.setPosixFilePermissions(Paths.get(targetBashScript), perms);
+            
+            printStream.println("Created bash script ~/.jars/bin/" + Paths.get(targetBashScript).getFileName());
         } catch (IOException ioex) {
             throw new JarInstallerException(ioex);
         }
