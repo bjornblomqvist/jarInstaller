@@ -1,6 +1,6 @@
 package jarinstaller.cmdline;
 
-import jarinstaller.JarInstaller;
+import static jarinstaller.Api.*;
 import jarinstaller.JarInstallerException;
 import jarinstaller.cmdline.classpath.DependencyLoader;
 import java.io.File;
@@ -62,7 +62,7 @@ public class Application {
                     return;
                 }
 
-                JarInstaller.install(new File(nonOptions.get(1)).toPath(), System.out);
+                install(new File(nonOptions.get(1)).toPath(), System.out);
             } else if (nonOptions.get(0).equals("uninstall")) {
                 if (nonOptions.size() == 1) {
                     System.err.println(
@@ -74,7 +74,7 @@ public class Application {
                     return;
                 }
 
-                JarInstaller.unInstall(new File(nonOptions.get(1)).toPath(), System.out);
+                unInstall(new File(nonOptions.get(1)).toPath(), System.out);
             }   
         }
     }

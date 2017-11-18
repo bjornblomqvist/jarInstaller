@@ -14,7 +14,7 @@ import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.PosixFilePermission;
 import java.util.Set;
 
-public class JarInstaller {
+public class Api {
     
     public static boolean unInstall(Path jarPath) throws JarInstallerException {
         return unInstall(jarPath, new PrintStream(new ByteArrayOutputStream()));

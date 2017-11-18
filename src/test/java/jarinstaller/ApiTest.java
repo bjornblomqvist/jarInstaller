@@ -304,7 +304,7 @@ public class JarInstallerTest {
                 it("should throw an exception", () -> {
                     Exception exception = null;
                     try {
-                        JarInstaller.install(null);
+                        Api.install(null);
                     } catch (Exception ex) {
                         exception = ex;
                     }
