@@ -10,7 +10,9 @@ import java.io.InputStreamReader;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
@@ -22,6 +24,10 @@ import org.junit.runner.RunWith;
 public class ApiTest {
     
     public static String runJar(String jarPath, String... args) throws IOException {
+        return runJar(jarPath, new HashMap(), args);
+    }
+    
+    public static String runJar(String jarPath, Map<String, String> env, String... args) throws IOException {
         
         List<String> commands = new ArrayList();
         commands.add("java");
@@ -30,6 +36,7 @@ public class ApiTest {
         commands.addAll(Arrays.asList(args));
         
         ProcessBuilder builder = new ProcessBuilder(commands.toArray(new String[commands.size()]));
+        builder.environment().putAll(env);
         builder.environment().put("HOME", System.getProperty("user.home"));
         Process process = builder.start();
         

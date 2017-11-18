@@ -1,18 +1,17 @@
 package jarinstaller.cmdline;
 
-import com.greghaskins.spectrum.Block;
 import com.greghaskins.spectrum.Spectrum;
 import com.greghaskins.spectrum.Variable;
 import static com.greghaskins.spectrum.dsl.specification.Specification.*;
 import static jarinstaller.ApiTest.buildTestJars;
 import static jarinstaller.ApiTest.runJar;
 import static jarinstaller.ApiTest.tryToDelete;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.PrintStream;
+import java.nio.file.Files;
 import java.nio.file.Paths;
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.is;
+import java.nio.file.StandardOpenOption;
+import java.util.HashMap;
+import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import org.junit.runner.RunWith;
 
@@ -42,6 +41,8 @@ public class ApplicationIT {
                 tryToDelete(new File(DUMMY_HOME + ".jars/bin/test"));
                 tryToDelete(new File(DUMMY_HOME + ".jars/bin/"));
                 tryToDelete(new File(DUMMY_HOME + ".jars/"));
+                
+                Files.write(new File(DUMMY_HOME + ".profile").toPath(), "".getBytes(), StandardOpenOption.TRUNCATE_EXISTING);
             });
             
             context("no params", () -> {
@@ -108,6 +109,35 @@ public class ApplicationIT {
                 it("should add script file to bin directory", () -> {
                    assertThat(new File(DUMMY_HOME+".jars/bin/test").exists(), is(true));
                 }); 
+                
+                context("~/.jars/bin is not in PATH", () -> {
+                    
+                    beforeEach(() -> {
+                        Files.write(new File(DUMMY_HOME + ".profile").toPath(), "".getBytes(), StandardOpenOption.TRUNCATE_EXISTING);
+                        HashMap<String, String> env = new HashMap();
+                        env.put("PATH", "");
+                        stdout.set(runJar("./target/jarinstaller-0.1.0-SNAPSHOT.jar", env, "install", "target/test.jar"));
+                    });
+                    
+                    it("should add sippet that adds the path to ~/.profile", () -> {
+                        String profileContent = new String(Files.readAllBytes(new File(DUMMY_HOME+".profile").toPath()));
+                        assertThat(profileContent, containsString("PATH=$PATH:$HOME/.jars/bin # Add jarinstaller bin to PATH"));
+                    });
+                });
+                
+                context("~/.jars/bin is in PATH", () -> {
+                    beforeEach(() -> {
+                        Files.write(new File(DUMMY_HOME + ".profile").toPath(), "".getBytes(), StandardOpenOption.TRUNCATE_EXISTING);
+                        HashMap<String, String> env = new HashMap();
+                        env.put("PATH", "/.jars/bin");
+                        stdout.set(runJar("./target/jarinstaller-0.1.0-SNAPSHOT.jar", env, "install", "target/test.jar"));
+                    });
+                    
+                    it("should not add a sippet to ~/.profile", () -> {
+                        String profileContent = new String(Files.readAllBytes(new File(DUMMY_HOME+".profile").toPath()));
+                        assertThat(profileContent, not(containsString("PATH=$PATH:$HOME/.jars/bin # Add jarinstaller bin to PATH")));
+                    });
+                });
             });
             
             describe("--install-self", () -> {

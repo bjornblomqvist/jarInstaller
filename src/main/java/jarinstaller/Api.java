@@ -11,6 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.PosixFilePermission;
 import java.util.Set;
 
@@ -84,6 +85,16 @@ public class Api {
                 printStream.println("Copied self to ~/.jars/jars/" + jarPath.getFileName());
             } else {
                 printStream.println("Copied " + jarPath + " to ~/.jars/jars/" + jarPath.getFileName());
+            }
+            
+            if (!System.getenv("PATH").contains("/.jars/bin")) {
+                printStream.println("Adding ~/.jars/bin to $PATH. Made changes to ~/.profile");
+                Files.write(
+                    new File(System.getProperty("user.home") + "/.profile").toPath(),
+                    "\nPATH=$PATH:$HOME/.jars/bin # Add jarinstaller bin to PATH\n".getBytes(),
+                    StandardOpenOption.CREATE,
+                    StandardOpenOption.APPEND
+                );
             }
             
             String targetBashScript = targetBinDir.toPath().resolve(jarPath.getFileName().toString().split("\\.")[0]).toString();
