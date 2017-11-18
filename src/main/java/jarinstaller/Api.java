@@ -53,6 +53,10 @@ public class Api {
     }
     
     public static boolean install(Path jarPath, PrintStream printStream) throws JarInstallerException {
+        return install(jarPath, printStream, false);
+    }
+    
+    public static boolean install(Path jarPath, PrintStream printStream, boolean installingSelf) throws JarInstallerException {
         try {
             if (Files.isDirectory(jarPath) || !Files.exists(jarPath)) {
                 throw new JarInstallerException("Install should only be called from inside a JAR file, path: " + jarPath);
@@ -76,8 +80,12 @@ public class Api {
             Path targetPath = targetDir.toPath().resolve(jarPath.getFileName());
 
             Files.copy(jarPath, targetPath, StandardCopyOption.REPLACE_EXISTING);
-            printStream.println("Copied " + jarPath + " to ~/.jars/jars/" + jarPath.getFileName());
-
+            if (installingSelf) {
+                printStream.println("Copied self to ~/.jars/jars/" + jarPath.getFileName());
+            } else {
+                printStream.println("Copied " + jarPath + " to ~/.jars/jars/" + jarPath.getFileName());
+            }
+            
             String targetBashScript = targetBinDir.toPath().resolve(jarPath.getFileName().toString().split("\\.")[0]).toString();
             if (targetBashScript.endsWith("-1")) {
                 targetBashScript = targetBinDir.toPath().resolve(jarPath.getFileName().toString().split("-")[0]).toString();

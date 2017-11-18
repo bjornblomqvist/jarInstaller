@@ -19,7 +19,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import org.junit.runner.RunWith;
 
 @RunWith(Spectrum.class)
-public class JarInstallerTest {
+public class ApiTest {
     
     public static String runJar(String jarPath, String... args) throws IOException {
         
@@ -120,8 +120,7 @@ public class JarInstallerTest {
             file.delete();
         } catch (Exception ex) {
             ex.printStackTrace();
-        }
-            
+        }   
     }
     
     public static void buildTestJars() throws IOException, InterruptedException {

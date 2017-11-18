@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import static java.util.Arrays.asList;
 import java.util.List;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
@@ -23,10 +24,14 @@ public class Application {
     private static class Inner {
         
         public static void main(String...args) throws JarInstallerException, IOException {
-
+            if (System.getenv("HOME") != null) {
+                System.setProperty("user.home", System.getenv("HOME"));
+            }
+            
             OptionParser parser = new OptionParser();
             parser.accepts("help");
             parser.accepts("h");
+            parser.accepts("install-self");
 
             OptionSet optionSet;
 
@@ -43,6 +48,11 @@ public class Application {
 
                 return;
             }
+            
+            if (optionSet.has("install-self")) {
+                installSelf();
+                return;
+            }
 
             List<String> nonOptions = (List<String>) new ArrayList(optionSet.nonOptionArguments());
             nonOptions.removeIf((o) -> o == null || o.trim().isEmpty());
@@ -56,7 +66,7 @@ public class Application {
                     System.err.println(
                         "Install action needs a jar file path.\n" +
                         "\n" +
-                        "Like this: jarInstaller install path/to/your.jar\n"
+                        "Like this: jarinstaller install path/to/your.jar\n"
                     );
 
                     return;
@@ -68,7 +78,7 @@ public class Application {
                     System.err.println(
                         "Uninstall action needs a jar file path.\n" +
                         "\n" +
-                        "Like this: jarInstaller uninstall path/to/your.jar\n"
+                        "Like this: jarinstaller uninstall path/to/your.jar\n"
                     );
 
                     return;
@@ -78,19 +88,24 @@ public class Application {
             }   
         }
     }
+    
+    private static void installSelf() throws JarInstallerException {
+        install(getJarPathFor(Application.class), System.out, true);
+    }
 
     private static void printHelp() {
         System.out.println(
                 "\n" +
-                "usage: jarInstaller [--help] [install|uninstall] [jarfile]\n" +
+                "usage: jarinstaller [--help] [install|uninstall] [jarfile]\n" +
                 "\n" +
                 "jarInstaller is used to install runnable jars and map them\n" +
                 "to a command in the path.\n" +
                 "\n"+
-                "   install     Installes a jar file\n" +
-                "   uninstall   Uninstalles a jar file\n" +
+                "   install         Installes a jar file\n" +
+                "   uninstall       Uninstalles a jar file\n" +
                 "\n" +
-                "   -h, --help  show help\n" +
+                "   -h, --help      show help\n" +
+                "   --install-self  installes jarinstaller\n" +
                 "\n"
             );
     }

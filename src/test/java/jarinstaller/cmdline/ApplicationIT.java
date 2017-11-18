@@ -3,14 +3,10 @@ package jarinstaller.cmdline;
 import com.greghaskins.spectrum.Block;
 import com.greghaskins.spectrum.Spectrum;
 import com.greghaskins.spectrum.Variable;
-import static com.greghaskins.spectrum.dsl.specification.Specification.afterAll;
-import static com.greghaskins.spectrum.dsl.specification.Specification.beforeAll;
-import static com.greghaskins.spectrum.dsl.specification.Specification.beforeEach;
-import static com.greghaskins.spectrum.dsl.specification.Specification.context;
-import static com.greghaskins.spectrum.dsl.specification.Specification.it;
-import static com.greghaskins.spectrum.dsl.specification.Specification.describe;
-import static jarinstaller.JarInstallerTest.buildTestJars;
-import static jarinstaller.JarInstallerTest.tryToDelete;
+import static com.greghaskins.spectrum.dsl.specification.Specification.*;
+import static jarinstaller.ApiTest.buildTestJars;
+import static jarinstaller.ApiTest.runJar;
+import static jarinstaller.ApiTest.tryToDelete;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.PrintStream;
@@ -21,7 +17,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import org.junit.runner.RunWith;
 
 @RunWith(Spectrum.class)
-public class ApplicationTest {
+public class ApplicationIT {
     
     {
         String cwd = Paths.get(".").toAbsolutePath().normalize().toString();
@@ -52,13 +48,11 @@ public class ApplicationTest {
                 Variable<String> stdout = new Variable();
                 
                 beforeEach(() -> {
-                    stdout.set(captureOutput(() -> {
-                        Application.main("");
-                    }));
+                    stdout.set(runJar("./target/jarinstaller-0.1.0-SNAPSHOT.jar", ""));
                 });
                 
                 it("should show the help", () -> {
-                    assertThat(stdout.get(), containsString("usage: jarInstaller"));
+                    assertThat(stdout.get(), containsString("usage: jarinstaller"));
                 });
             });
             
@@ -67,13 +61,11 @@ public class ApplicationTest {
                 Variable<String> stdout = new Variable();
                 
                 beforeEach(() -> {
-                    stdout.set(captureOutput(() -> {
-                        Application.main("--help");
-                    }));
+                    stdout.set(runJar("./target/jarinstaller-0.1.0-SNAPSHOT.jar", "--help"));
                 });
 
                 it("should show the help", () -> {
-                    assertThat(stdout.get(), containsString("usage: jarInstaller"));
+                    assertThat(stdout.get(), containsString("usage: jarinstaller"));
                 });
             });
             
@@ -81,9 +73,7 @@ public class ApplicationTest {
                 Variable<String> stdout = new Variable();
                 
                 beforeEach(() -> {
-                    stdout.set(captureOutput(() -> {
-                        Application.main("install");
-                    }));
+                    stdout.set(runJar("./target/jarinstaller-0.1.0-SNAPSHOT.jar", "install"));
                 });
                 
                 it("should print that it needs a jar file path", () -> {
@@ -91,7 +81,7 @@ public class ApplicationTest {
                 });
                 
                 it("should print an example", () -> {
-                    assertThat(stdout.get(), containsString("jarInstaller install path/to/your.jar"));
+                    assertThat(stdout.get(), containsString("jarinstaller install path/to/your.jar"));
                 });
             });
             
@@ -100,9 +90,7 @@ public class ApplicationTest {
                 Variable<String> stdout = new Variable();
                 
                 beforeEach(() -> {
-                    stdout.set(captureOutput(() -> {
-                        Application.main("install", "target/test.jar");
-                    }));
+                    stdout.set(runJar("./target/jarinstaller-0.1.0-SNAPSHOT.jar", "install", "target/test.jar"));
                 });
                 
                 it("should print that it copied the jar", () -> {
@@ -122,14 +110,37 @@ public class ApplicationTest {
                 }); 
             });
             
+            describe("--install-self", () -> {
+                
+                Variable<String> stdout = new Variable();
+                
+                beforeEach(() -> {
+                    stdout.set(runJar("./target/jarinstaller-0.1.0-SNAPSHOT.jar", "--install-self"));
+                });
+                
+                it("should print that it copied the jar", () -> {
+                    assertThat(stdout.get(), containsString("Copied self to ~/.jars/jars/jarinstaller-"));
+                });
+               
+                it("should print that it created bash script", () -> {
+                    assertThat(stdout.get(), containsString("Created bash script ~/.jars/bin/jarinstaller"));
+                });
+                
+                it("should add script file to bin directory", () -> {
+                   assertThat(new File(DUMMY_HOME+".jars/bin/jarinstaller-0").exists(), is(true));
+                }); 
+                
+                it("should add the jar to the jars directory", () -> {
+                   assertThat(new File(DUMMY_HOME+".jars/jars/jarinstaller-0.1.0-SNAPSHOT.jar").exists(), is(true));
+                });
+            });
+            
             describe("uninstall target/test.jar", () -> {
                 Variable<String> stdout = new Variable();
                 
                 context("when called without a path", () -> {
                     beforeEach(() -> {
-                        stdout.set(captureOutput(() -> {
-                            Application.main("uninstall");
-                        }));
+                        stdout.set(runJar("./target/jarinstaller-0.1.0-SNAPSHOT.jar", "uninstall"));
                     }); 
                     
                     it("should say that uninstall needs a path", () -> {
@@ -137,16 +148,14 @@ public class ApplicationTest {
                     });
                     
                     it("should should print an example usage", () -> {
-                        assertThat(stdout.get(), containsString("Like this: jarInstaller uninstall path/to/your.jar"));
+                        assertThat(stdout.get(), containsString("Like this: jarinstaller uninstall path/to/your.jar"));
                     });
                 });
                 
                 context("the jar has not been installed", () -> {
                     
                     beforeEach(() -> {
-                        stdout.set(captureOutput(() -> {
-                            Application.main("uninstall", "target/test.jar");
-                        }));
+                        stdout.set(runJar("./target/jarinstaller-0.1.0-SNAPSHOT.jar", "uninstall", "target/test.jar"));
                     });
 
                     it("should say that the jar has not been installed", () -> {
@@ -157,10 +166,8 @@ public class ApplicationTest {
                 context("target/test.jar is installed", () -> {
                     
                     beforeEach(() -> {
-                        Application.main("install", "target/test.jar");
-                        stdout.set(captureOutput(() -> {
-                            Application.main("uninstall", "target/test.jar");
-                        }));
+                        runJar("./target/jarinstaller-0.1.0-SNAPSHOT.jar", "install", "target/test.jar");
+                        stdout.set(runJar("./target/jarinstaller-0.1.0-SNAPSHOT.jar", "uninstall" , "target/test.jar"));
                     });
                     
                     it("should say that it is removing the jar file", () -> {
@@ -181,24 +188,5 @@ public class ApplicationTest {
                 });
             });
         });
-    }
-    
-    private static String captureOutput(Block block) throws Throwable {
-        PrintStream currentStdout = System.out;
-        PrintStream currentErrout = System.err;
-        
-        try {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            PrintStream newOut = new PrintStream(baos);
-            System.setOut(newOut);
-            System.setErr(newOut);
-            
-            block.run();
-            
-            return baos.toString();
-        } finally {
-            System.setOut(currentStdout);
-            System.setErr(currentErrout);
-        }
-    }
+    }  
 }
