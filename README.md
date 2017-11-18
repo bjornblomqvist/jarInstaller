@@ -1,26 +1,32 @@
 # Jar Installer
 
 Jar installer is a simple library and command line tool for installing runnable
-jars in your home directory `~/.jars` and adding `~/.jars/bin` to your PATH.
+jars. It adds the `~/.jars/jars` and puts a bash script in `~/.jars/bin`.
 
 Once a jar has been installed it will be as easy to run as any other program.
 
-    curl -O http://www.catacombae.org/typhertransfer/filetransfer.jar
-    jarInstaller install filetransfer.jar
-    filetransfer
-
-## Use the lib
+## Using the library
 	
-Just add a single line of code. Where Application.class is in the jar file that
-you wish to install.
+You can create a self installing jar by including the library and using its API
+from inside the main method to install it.
 
-    JarInstaller.install(getJarPathFor(Application.class));
-
-## Install command line tool
-
-    git clone git@github.com:bjornblomqvist/jarInstaller.git
-    cd jarInstaller
-    mvn package
-
-    java -jar target/jarinstaller-0.1.0-SNAPSHOT.jar --install --add-to-path
+    import static jarinstaller.Api.*;
     
+    public class Application {
+        public static void main(String...args) {
+            if (args[0].equals("--install")) {
+                install(getJarPathFor(Application.class));
+            }
+        }
+    }
+
+## Installing using the command line tool
+
+    jarinstaller install a-runnable.jar
+    
+## Installing the command line tool
+
+    curl -O https://github.com/bjornblomqvist/jarInstaller...
+    java -jar jarinstall.jar --install-self --add-to-path
+    
+    jarinstaller --help
