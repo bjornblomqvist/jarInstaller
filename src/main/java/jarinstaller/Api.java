@@ -49,7 +49,7 @@ public class Api {
     }
     
     public static boolean install(Path jarPath) throws JarInstallerException {
-        return install(jarPath, new PrintStream(new ByteArrayOutputStream()));
+        return install(jarPath, System.out);
     }
     
     public static boolean install(Path jarPath, PrintStream printStream) throws JarInstallerException {
