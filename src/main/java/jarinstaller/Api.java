@@ -88,13 +88,21 @@ public class Api {
             }
             
             if (!System.getenv("PATH").contains("/.jars/bin")) {
-                printStream.println("Adding ~/.jars/bin to $PATH. Made changes to ~/.profile");
-                Files.write(
-                    new File(System.getProperty("user.home") + "/.profile").toPath(),
-                    "\nPATH=$PATH:$HOME/.jars/bin # Add jarinstaller bin to PATH\n".getBytes(),
-                    StandardOpenOption.CREATE,
-                    StandardOpenOption.APPEND
-                );
+                Path profilePath = new File(System.getProperty("user.home") + "/.profile").toPath();
+                boolean hasAlreadyBeenAdded = false;
+                if (Files.exists(profilePath)) {
+                    String profile = new String(Files.readAllBytes(profilePath));
+                    hasAlreadyBeenAdded = profile.contains("/.jars/bin");
+                }
+                if (!hasAlreadyBeenAdded) {
+                    printStream.println("Adding ~/.jars/bin to $PATH. Made changes to ~/.profile");
+                    Files.write(
+                        profilePath,
+                        "\nPATH=$PATH:$HOME/.jars/bin # Add jarinstaller bin to PATH\n".getBytes(),
+                        StandardOpenOption.CREATE,
+                        StandardOpenOption.APPEND
+                    );
+                }
             }
             
             String targetBashScript = targetBinDir.toPath().resolve(jarPath.getFileName().toString().split("\\.")[0]).toString();

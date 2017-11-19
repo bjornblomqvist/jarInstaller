@@ -138,6 +138,21 @@ public class ApplicationIT {
                         assertThat(profileContent, not(containsString("PATH=$PATH:$HOME/.jars/bin # Add jarinstaller bin to PATH")));
                     });
                 });
+                
+                context("we have already written to .profile", () -> {
+                    beforeEach(() -> {
+                        Files.write(new File(DUMMY_HOME + ".profile").toPath(), "".getBytes(), StandardOpenOption.TRUNCATE_EXISTING);
+                        HashMap<String, String> env = new HashMap();
+                        env.put("PATH", "");
+                        stdout.set(runJar("./target/jarinstaller-0.1.0-SNAPSHOT.jar", env, "install", "target/test.jar"));
+                        stdout.set(runJar("./target/jarinstaller-0.1.0-SNAPSHOT.jar", env, "install", "target/test.jar"));
+                    });
+                    
+                    it("should not add a sippet to ~/.profile", () -> {
+                        String profileContent = new String(Files.readAllBytes(new File(DUMMY_HOME+".profile").toPath()));
+                        assertThat(profileContent, not(containsString("PATH=$PATH:$HOME/.jars/bin # Add jarinstaller bin to PATH\n\nPATH=$PATH:$HOME/.jars/bin # Add jarinstaller bin to PATH")));
+                    });
+                });
             });
             
             describe("--install-self", () -> {
