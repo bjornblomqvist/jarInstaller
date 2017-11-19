@@ -28,7 +28,8 @@ from inside the main method to install it.
     
 ## Installing the command line tool
 
-    curl -O https://github.com/bjornblomqvist/jarInstaller...
-    java -jar jarinstall.jar --install-self --add-to-path
-    
-    jarinstaller --help
+    curl -OL https://github.com/bjornblomqvist/jarInstaller/releases/download/0.1.0/jarinstaller-0.1.0.jar
+    java -jar jarinstaller-0.1.0.jar --install-self
+    export PATH=$PATH:~/.jars/bin
+
+    jarinstaller-0 --help
