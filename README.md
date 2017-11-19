@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/bjornblomqvist/jarInstaller.svg?branch=master)](https://travis-ci.org/bjornblomqvist/jarInstaller)
 
-# Jar Installer
+# jarinstaller
 
 Jar installer is a simple library and command line tool for installing runnable
 jars. It adds the `~/.jars/jars` and puts a bash script in `~/.jars/bin`.
