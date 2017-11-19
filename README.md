@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/bjornblomqvist/jarInstaller.svg?branch=master)](https://travis-ci.org/bjornblomqvist/jarInstaller)
+
 # Jar Installer
 
 Jar installer is a simple library and command line tool for installing runnable
