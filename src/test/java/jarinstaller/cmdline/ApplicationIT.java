@@ -57,6 +57,22 @@ public class ApplicationIT {
                 });
             });
             
+            context("unknown params", () -> {
+                Variable<String> stdout = new Variable();
+                
+                beforeEach(() -> {
+                    stdout.set(runJar("./target/jarinstaller-0.1.0-SNAPSHOT.jar", "huphup"));
+                });
+                
+                it("should show the help", () -> {
+                    assertThat(stdout.get(), containsString("usage: jarinstaller"));
+                });
+                
+                it("should print the known param", () -> {
+                    assertThat(stdout.get(), containsString("ERROR! unknown param, \"huphup\""));
+                });
+            });
+            
             describe("--help", () -> {
                 
                 Variable<String> stdout = new Variable();

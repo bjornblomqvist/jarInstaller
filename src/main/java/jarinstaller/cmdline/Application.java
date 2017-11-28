@@ -85,7 +85,10 @@ public class Application {
                 }
 
                 unInstall(new File(nonOptions.get(1)).toPath(), System.out);
-            }   
+            } else {
+                System.out.println("\nERROR! unknown param, \"" + nonOptions.get(0) + "\"");
+                printHelp();
+            }
         }
     }
     
