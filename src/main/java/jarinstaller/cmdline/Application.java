@@ -3,12 +3,20 @@ package jarinstaller.cmdline;
 import static jarinstaller.Api.*;
 import jarinstaller.JarInstallerException;
 import jarinstaller.cmdline.classpath.DependencyLoader;
+import jarinstaller.impl.Utils.NameAndVersion;
+import static jarinstaller.impl.Utils.getBinDir;
+import static jarinstaller.impl.Utils.getJarsDir;
+import static jarinstaller.impl.Utils.getNameAndVersion;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import static java.util.Arrays.asList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import static java.util.regex.Pattern.MULTILINE;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 
@@ -85,11 +93,47 @@ public class Application {
                 }
 
                 unInstall(new File(nonOptions.get(1)).toPath(), System.out);
+            } else if (nonOptions.get(0).equals("list")) {
+                listJars();
             } else {
                 System.out.println("\nERROR! unknown param, \"" + nonOptions.get(0) + "\"");
                 printHelp();
             }
         }
+    }
+    
+    private static String padRight(String s, int n) {
+        return String.format("%1$-" + n + "s", s);  
+    }
+    
+    private static void listJars() throws IOException {
+        System.out.println("\n\tInstalled jars\n");
+        
+        Pattern pattern = Pattern.compile("JARINSTALLER_JAR_PATH=(.*)$", MULTILINE);
+        
+        String[] fileNames = getBinDir().list();
+        int maxLength = 0;
+        for (String fileName : fileNames) {
+            maxLength = Math.max(maxLength, fileName.length());
+        }
+        
+        for (String fileName : fileNames) {
+            String bashScript = new String(Files.readAllBytes(getBinDir().toPath().resolve(fileName)), "UTF-8");
+            
+            Matcher matcher = pattern.matcher(bashScript);
+            if (matcher.find()) {
+                String path = matcher.group(1);
+                String jarFileName = new File(path).toPath().getFileName().toString();
+                NameAndVersion nameAndVersion = getNameAndVersion(jarFileName);
+                
+                String missingJar = new File(path).exists() ? "" : " (missing jar)";
+                String version = nameAndVersion.version.trim().length() == 0 ? "" : " (" + nameAndVersion.version + ")";
+                
+                System.out.println(padRight(fileName, maxLength) + " -> " + jarFileName + missingJar);
+            }
+        }
+        
+        System.out.println("");
     }
     
     private static void installSelf() throws JarInstallerException {
@@ -106,6 +150,7 @@ public class Application {
                 "\n"+
                 "   install         Installes a jar file\n" +
                 "   uninstall       Uninstalles a jar file\n" +
+                "   list            List installed jars\n" +
                 "\n" +
                 "   -h, --help      show help\n" +
                 "   --install-self  installes jarinstaller\n" +

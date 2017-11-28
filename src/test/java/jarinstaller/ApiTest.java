@@ -122,6 +122,15 @@ public class ApiTest {
         return result;
     }
     
+    public static void tryToDelete(File[] files) {
+        if (files == null) {
+            return;
+        }
+        for (File file : files) {
+            tryToDelete(file);
+        }
+    }
+    
     public static void tryToDelete(File file) {
         try {
             file.delete();
@@ -141,6 +150,19 @@ public class ApiTest {
             process.waitFor();
 
             process = new ProcessBuilder("jar", "uvf", "./target/test.jar", "-C", "./target/test-classes", "jarinstaller/TestMain.class").start();
+            process.waitFor();
+        }
+        
+        {
+            File test_jar = new File("./target/test2-1.0.1.jar");
+            if (test_jar.exists()) {
+                test_jar.delete();
+            }
+
+            Process process = new ProcessBuilder("jar", "cvfm", "./target/test2-1.0.1.jar", "./src/test/resources/MANIFEST.MF", "-C", "./target/classes", "jarinstaller").start();
+            process.waitFor();
+
+            process = new ProcessBuilder("jar", "uvf", "./target/test2-1.0.1.jar", "-C", "./target/test-classes", "jarinstaller/TestMain.class").start();
             process.waitFor();
         }
         
@@ -177,9 +199,9 @@ public class ApiTest {
         });
         
         beforeEach(() -> {
-            tryToDelete(new File(DUMMY_HOME + ".jars/jars/test.jar"));
+            tryToDelete(new File(DUMMY_HOME + ".jars/jars/").listFiles());
             tryToDelete(new File(DUMMY_HOME + ".jars/jars/"));
-            tryToDelete(new File(DUMMY_HOME + ".jars/bin/test"));
+            tryToDelete(new File(DUMMY_HOME + ".jars/bin/").listFiles());
             tryToDelete(new File(DUMMY_HOME + ".jars/bin/"));
             tryToDelete(new File(DUMMY_HOME + ".jars/"));
         });

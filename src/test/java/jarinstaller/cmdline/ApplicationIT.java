@@ -36,9 +36,9 @@ public class ApplicationIT {
             });
             
             beforeEach(() -> {
-                tryToDelete(new File(DUMMY_HOME + ".jars/jars/test.jar"));
+                tryToDelete(new File(DUMMY_HOME + ".jars/jars/").listFiles());
                 tryToDelete(new File(DUMMY_HOME + ".jars/jars/"));
-                tryToDelete(new File(DUMMY_HOME + ".jars/bin/test"));
+                tryToDelete(new File(DUMMY_HOME + ".jars/bin/").listFiles());
                 tryToDelete(new File(DUMMY_HOME + ".jars/bin/"));
                 tryToDelete(new File(DUMMY_HOME + ".jars/"));
                 
@@ -245,6 +245,25 @@ public class ApplicationIT {
                     
                     it("should remove the script file", () -> {
                         assertThat(new File(DUMMY_HOME+".jars/bin/test").exists(), is(false));
+                    });
+                });
+            });
+            
+            describe("list", () -> {
+                
+                Variable<String> stdout = new Variable();
+                
+                context("there are two jars installed", () -> {
+                    
+                    beforeEach(() -> {
+                        runJar("./target/jarinstaller-0.1.0-SNAPSHOT.jar", "install", "target/test.jar");
+                        runJar("./target/jarinstaller-0.1.0-SNAPSHOT.jar", "install", "target/test2-1.0.1.jar");
+                        stdout.set(runJar("./target/jarinstaller-0.1.0-SNAPSHOT.jar", "list"));
+                    });
+                    
+                    it("should show the two installed jars", () -> {
+                        assertThat(stdout.get(), containsString("test  -> test.jar"));
+                        assertThat(stdout.get(), containsString("test2 -> test2-1.0.1.jar"));
                     });
                 });
             });
