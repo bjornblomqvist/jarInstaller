@@ -164,7 +164,7 @@ public class ApplicationIT {
                 });
                 
                 it("should print that it copied the jar", () -> {
-                    assertThat(stdout.get(), containsString("Copied self to ~/.jars/jars/jarinstaller-"));
+                    assertThat(stdout.get(), containsString("Copied self to ~/.jars/jars/jarinstaller-0.1.0-SNAPSHOT.jar"));
                 });
                
                 it("should print that it created bash script", () -> {
@@ -172,11 +172,11 @@ public class ApplicationIT {
                 });
                 
                 it("should add script file to bin directory", () -> {
-                   assertThat(new File(DUMMY_HOME+".jars/bin/jarinstaller-0").exists(), is(true));
+                   assertThat(DUMMY_HOME+".jars/bin/jarinstaller does not exist", new File(DUMMY_HOME+".jars/bin/jarinstaller").exists(), is(true));
                 }); 
                 
                 it("should add the jar to the jars directory", () -> {
-                   assertThat(new File(DUMMY_HOME+".jars/jars/jarinstaller-0.1.0-SNAPSHOT.jar").exists(), is(true));
+                   assertThat(DUMMY_HOME+".jars/jars/jarinstaller-0.1.0-SNAPSHOT.jar does not exist", new File(DUMMY_HOME+".jars/jars/jarinstaller-0.1.0-SNAPSHOT.jar").exists(), is(true));
                 });
             });
             

@@ -22,14 +22,14 @@ from inside the main method to install it.
         }
     }
 
-## Installing using the command line tool
+## Using the command line tool
 
     jarinstaller install a-runnable.jar
     
-## Installing the command line tool
+## Install the command line tool
 
     curl -OL https://github.com/bjornblomqvist/jarInstaller/releases/download/0.1.0/jarinstaller-0.1.0.jar
     java -jar jarinstaller-0.1.0.jar --install-self
     export PATH=$PATH:~/.jars/bin
 
-    jarinstaller-0 --help
+    jarinstaller --help

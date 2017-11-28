@@ -13,7 +13,12 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.PosixFilePermission;
+import java.util.ArrayList;
+import static java.util.Arrays.asList;
+import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Api {
     
@@ -29,7 +34,10 @@ public class Api {
         File targetDir = new File("~/.jars/jars/".replaceFirst("^~",System.getProperty("user.home")));
         File targetBinDir = new File("~/.jars/bin/".replaceFirst("^~",System.getProperty("user.home")));
         Path targetPath = targetDir.toPath().resolve(jarPath.getFileName());
-        String targetBashScript = targetBinDir.toPath().resolve(jarPath.getFileName().toString().split("\\.")[0]).toString();
+        
+        NameAndVersion nameAndVersion = getNameAndVersion(jarPath.toString());
+        
+        String targetBashScript = targetBinDir.toPath().resolve(nameAndVersion.name).toString();
         
         if (!Files.exists(targetPath)) {
             printStream.println("There is no " + jarPath.getFileName() + " in ~/.jars/jars/");
@@ -105,10 +113,9 @@ public class Api {
                 }
             }
             
-            String targetBashScript = targetBinDir.toPath().resolve(jarPath.getFileName().toString().split("\\.")[0]).toString();
-            if (targetBashScript.endsWith("-1")) {
-                targetBashScript = targetBinDir.toPath().resolve(jarPath.getFileName().toString().split("-")[0]).toString();
-            }
+            NameAndVersion nameAndVersion = getNameAndVersion(jarPath.toString());
+            
+            String targetBashScript = targetBinDir.toPath().resolve(nameAndVersion.name).toString();
             
             try(FileWriter bashScriptOutputstream = new FileWriter(targetBashScript);) {
                 bashScriptOutputstream.write("#!/bin/bash\n" +
@@ -117,7 +124,7 @@ public class Api {
                 "export JARINSTALLER_JAR_PATH=" + targetPath + "\n" +
                 "export JARINSTALLER_SCRIPT_PATH=" + targetBashScript + "\n" +
                 "\n" +
-                "java -jar $JARINSTALLER_JAR_PATH \"$@\"");
+                "java -jar $JARINSTALLER_JAR_PATH \"$@\"\n");
             }
 
             Set<PosixFilePermission> perms = Files.getPosixFilePermissions(Paths.get(targetBashScript));
@@ -165,6 +172,33 @@ public class Api {
             return new File(mainClass.getProtectionDomain().getCodeSource().getLocation().toURI().getPath()).toPath();
         } catch (URISyntaxException e) {
             throw new JarInstallerException("Failed find to jar", e);
+        }
+    }
+    
+    static Pattern pattern = Pattern.compile("(.*)-(\\d+\\.\\d+.*)(javadoc|sources|).jar");
+    
+    private static NameAndVersion getNameAndVersion(String path) {
+        String name = new File(path).getName();
+        Matcher matcher = pattern.matcher(name);
+        if (matcher.matches()) {
+            return new NameAndVersion(matcher.group(1), matcher.group(2));
+        } else if (name.contains("-")) {
+            List<String> parts = new ArrayList(asList(name.split("-")));
+            String version = parts.remove(parts.size() - 1);
+            return new NameAndVersion(String.join("-", parts), version);
+        } else {
+            return new NameAndVersion(name.replace(".jar", ""), "");
+        }
+    }
+    
+    public static class NameAndVersion {
+        
+        String name;
+        String version;
+        
+        public NameAndVersion(String name, String version) {
+            this.name = name;
+            this.version = version;
         }
     }
 }
