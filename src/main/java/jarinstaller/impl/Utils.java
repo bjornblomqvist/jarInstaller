@@ -7,8 +7,13 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import static java.util.Arrays.asList;
+import java.util.List;
 import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Utils {
 
@@ -31,4 +36,31 @@ public class Utils {
         }
     }
     
+    
+    static Pattern pattern = Pattern.compile("(.*)-(\\d+\\.\\d+.*)(javadoc|sources|).jar");
+    
+    public static NameAndVersion getNameAndVersion(String path) {
+        String name = new File(path).getName();
+        Matcher matcher = pattern.matcher(name);
+        if (matcher.matches()) {
+            return new NameAndVersion(matcher.group(1), matcher.group(2));
+        } else if (name.contains("-")) {
+            List<String> parts = new ArrayList(asList(name.split("-")));
+            String version = parts.remove(parts.size() - 1);
+            return new NameAndVersion(String.join("-", parts), version);
+        } else {
+            return new NameAndVersion(name.replace(".jar", ""), "");
+        }
+    }
+    
+    public static class NameAndVersion {
+        
+        public String name;
+        public String version;
+        
+        public NameAndVersion(String name, String version) {
+            this.name = name;
+            this.version = version;
+        }
+    }
 }

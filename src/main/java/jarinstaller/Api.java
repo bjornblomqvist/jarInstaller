@@ -1,6 +1,8 @@
 package jarinstaller;
 
 import jarinstaller.impl.Utils;
+import jarinstaller.impl.Utils.NameAndVersion;
+import static jarinstaller.impl.Utils.getNameAndVersion;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileWriter;
@@ -172,33 +174,6 @@ public class Api {
             return new File(mainClass.getProtectionDomain().getCodeSource().getLocation().toURI().getPath()).toPath();
         } catch (URISyntaxException e) {
             throw new JarInstallerException("Failed find to jar", e);
-        }
-    }
-    
-    static Pattern pattern = Pattern.compile("(.*)-(\\d+\\.\\d+.*)(javadoc|sources|).jar");
-    
-    private static NameAndVersion getNameAndVersion(String path) {
-        String name = new File(path).getName();
-        Matcher matcher = pattern.matcher(name);
-        if (matcher.matches()) {
-            return new NameAndVersion(matcher.group(1), matcher.group(2));
-        } else if (name.contains("-")) {
-            List<String> parts = new ArrayList(asList(name.split("-")));
-            String version = parts.remove(parts.size() - 1);
-            return new NameAndVersion(String.join("-", parts), version);
-        } else {
-            return new NameAndVersion(name.replace(".jar", ""), "");
-        }
-    }
-    
-    public static class NameAndVersion {
-        
-        String name;
-        String version;
-        
-        public NameAndVersion(String name, String version) {
-            this.name = name;
-            this.version = version;
         }
     }
 }
