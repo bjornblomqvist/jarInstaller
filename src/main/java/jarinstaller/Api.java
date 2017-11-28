@@ -2,6 +2,8 @@ package jarinstaller;
 
 import jarinstaller.impl.Utils;
 import jarinstaller.impl.Utils.NameAndVersion;
+import static jarinstaller.impl.Utils.getBinDir;
+import static jarinstaller.impl.Utils.getJarsDir;
 import static jarinstaller.impl.Utils.getNameAndVersion;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -15,12 +17,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.PosixFilePermission;
-import java.util.ArrayList;
-import static java.util.Arrays.asList;
-import java.util.List;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class Api {
     
@@ -33,8 +30,8 @@ public class Api {
             throw new JarInstallerException("Could not find jar to uninstall");
         }
         
-        File targetDir = new File("~/.jars/jars/".replaceFirst("^~",System.getProperty("user.home")));
-        File targetBinDir = new File("~/.jars/bin/".replaceFirst("^~",System.getProperty("user.home")));
+        File targetDir = getJarsDir();
+        File targetBinDir = getBinDir();
         Path targetPath = targetDir.toPath().resolve(jarPath.getFileName());
         
         NameAndVersion nameAndVersion = getNameAndVersion(jarPath.toString());
@@ -77,8 +74,8 @@ public class Api {
                 throw new JarInstallerException("Jar file Manifest does not have Main-class, " + jarPath);
             }
 
-            File targetDir = new File("~/.jars/jars/".replaceFirst("^~", System.getProperty("user.home")));
-            File targetBinDir = new File("~/.jars/bin/".replaceFirst("^~", System.getProperty("user.home")));
+            File targetDir = getJarsDir();
+            File targetBinDir = getBinDir();
 
             if (!targetDir.exists()) {
                 targetDir.mkdirs();

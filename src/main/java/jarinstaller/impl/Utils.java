@@ -53,6 +53,14 @@ public class Utils {
         }
     }
     
+    public static File getJarsDir() {
+        return new File(System.getProperty("user.home") + "/.jars/jars/");
+    }
+    
+    public static File getBinDir() {
+        return new File(System.getProperty("user.home") + "/.jars/bin/");
+    }
+    
     public static class NameAndVersion {
         
         public String name;
