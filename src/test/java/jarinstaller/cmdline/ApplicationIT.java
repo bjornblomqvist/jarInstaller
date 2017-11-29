@@ -249,6 +249,19 @@ public class ApplicationIT {
                 });
             });
             
+            describe("--version", () -> {
+                
+                Variable<String> stdout = new Variable();
+                
+                beforeEach(() -> {
+                    stdout.set(runJar("./target/jarinstaller-0.1.0-SNAPSHOT.jar", "--version"));
+                });
+                
+                it("should show the current version", () -> {
+                    assertThat(stdout.get(), containsString("jarinstaller 0.1.0"));
+                });
+            });
+            
             describe("list", () -> {
                 
                 Variable<String> stdout = new Variable();

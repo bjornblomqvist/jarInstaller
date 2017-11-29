@@ -21,6 +21,9 @@
                         <manifest>
                             <mainClass>jarinstaller.cmdline.Application</mainClass>
                         </manifest>
+                        <manifestEntries>
+                            <App-version>${project.version}</App-version>
+                        </manifestEntries>
                     </archive>
                 </configuration>
             </plugin>

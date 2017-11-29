@@ -5,15 +5,16 @@ import jarinstaller.JarInstallerException;
 import jarinstaller.cmdline.classpath.DependencyLoader;
 import jarinstaller.impl.Utils.NameAndVersion;
 import static jarinstaller.impl.Utils.getBinDir;
-import static jarinstaller.impl.Utils.getJarsDir;
 import static jarinstaller.impl.Utils.getNameAndVersion;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.util.ArrayList;
-import static java.util.Arrays.asList;
 import java.util.List;
+import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import static java.util.regex.Pattern.MULTILINE;
@@ -38,6 +39,7 @@ public class Application {
             
             OptionParser parser = new OptionParser();
             parser.accepts("help");
+            parser.accepts("version");
             parser.accepts("h");
             parser.accepts("install-self");
 
@@ -53,6 +55,12 @@ public class Application {
 
             if (optionSet.has("h") || optionSet.has("help")) {
                 printHelp();
+
+                return;
+            }
+            
+            if (optionSet.has("version")) {
+                printVersion();
 
                 return;
             }
@@ -139,22 +147,43 @@ public class Application {
     private static void installSelf() throws JarInstallerException {
         install(getJarPathFor(Application.class), System.out, true);
     }
+    
+    public static Properties readManifest(Class<?> clz) {
+        String resource = "/" + clz.getName().replace(".", "/") + ".class";
+        String fullPath = clz.getResource(resource).toString();
+        String archivePath = fullPath.substring(0, fullPath.length() - resource.length());
 
+        try (InputStream input = new URL(archivePath + "/META-INF/MANIFEST.MF").openStream()) {
+            Properties prop = new Properties();
+            prop.load(input);
+            return prop;
+            
+        } catch (Exception e) {
+            throw new RuntimeException("Loading MANIFEST for class " + clz + " failed!", e);
+        }
+    }
+    
+    private static void printVersion() {
+        Properties prop = readManifest(Application.class);
+        System.out.println("jarinstaller " + prop.getProperty("App-version"));
+    }
+    
     private static void printHelp() {
         System.out.println(
-                "\n" +
-                "usage: jarinstaller [--help] [install|uninstall] [jarfile]\n" +
-                "\n" +
-                "jarInstaller is used to install runnable jars and map them\n" +
-                "to a command in the path.\n" +
-                "\n"+
-                "   install         Installes a jar file\n" +
-                "   uninstall       Uninstalles a jar file\n" +
-                "   list            List installed jars\n" +
-                "\n" +
-                "   -h, --help      show help\n" +
-                "   --install-self  installes jarinstaller\n" +
-                "\n"
-            );
+            "\n" +
+            "usage: jarinstaller [--help] [install|uninstall] [jarfile]\n" +
+            "\n" +
+            "jarInstaller is used to install runnable jars and map them\n" +
+            "to a command in the path.\n" +
+            "\n"+
+            "   install         installes a jar file\n" +
+            "   uninstall       uninstalles a jar file\n" +
+            "   list            list installed jars\n" +
+            "\n" +
+            "   -h, --help      show help\n" +
+            "   --install-self  installes jarinstaller\n" +
+            "   --version       prints current version\n" + 
+            "\n"
+        );
     }
 }
