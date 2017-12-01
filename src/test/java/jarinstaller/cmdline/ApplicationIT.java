@@ -196,10 +196,12 @@ public class ApplicationIT {
                 });
             });
             
-            describe("uninstall target/test.jar", () -> {
+            
+            
+            describe("uninstall", () -> {
                 Variable<String> stdout = new Variable();
                 
-                context("when called without a path", () -> {
+                context("when called without a jar name", () -> {
                     beforeEach(() -> {
                         stdout.set(runJar("./target/jarinstaller-0.1.0-SNAPSHOT.jar", "uninstall"));
                     }); 
@@ -213,10 +215,10 @@ public class ApplicationIT {
                     });
                 });
                 
-                context("the jar has not been installed", () -> {
+                context("called with a jar name that is not installed", () -> {
                     
                     beforeEach(() -> {
-                        stdout.set(runJar("./target/jarinstaller-0.1.0-SNAPSHOT.jar", "uninstall", "target/test.jar"));
+                        stdout.set(runJar("./target/jarinstaller-0.1.0-SNAPSHOT.jar", "uninstall", "test.jar"));
                     });
 
                     it("should say that the jar has not been installed", () -> {
@@ -224,11 +226,46 @@ public class ApplicationIT {
                     });
                 });
                 
-                context("target/test.jar is installed", () -> {
+                context("called with a script name that is not installed", () -> {
+                    
+                    beforeEach(() -> {
+                        stdout.set(runJar("./target/jarinstaller-0.1.0-SNAPSHOT.jar", "uninstall", "test"));
+                    });
+
+                    it("should say that there is no such script in bin directory", () -> {
+                        assertThat(stdout.get(), containsString("There is no test in ~/.jars/bin/"));
+                    });
+                });
+
+                context("called with a script name that is installed", () -> {
                     
                     beforeEach(() -> {
                         runJar("./target/jarinstaller-0.1.0-SNAPSHOT.jar", "install", "target/test.jar");
-                        stdout.set(runJar("./target/jarinstaller-0.1.0-SNAPSHOT.jar", "uninstall" , "target/test.jar"));
+                        stdout.set(runJar("./target/jarinstaller-0.1.0-SNAPSHOT.jar", "uninstall" , "test"));
+                    });
+                    
+                    it("should say that it is removing the jar file", () -> {
+                        assertThat(stdout.get(), containsString("Removing ~/.jars/jars/test.jar"));
+                    });
+                    
+                    it("should say that it is removing the bash script", () -> {
+                        assertThat(stdout.get(), containsString("Removing ~/.jars/bin/test"));
+                    });
+                    
+                    it("should remove the jar file", () -> {
+                        assertThat(new File(DUMMY_HOME+".jars/jars/test.jar").exists(), is(false));
+                    });
+                    
+                    it("should remove the script file", () -> {
+                        assertThat(new File(DUMMY_HOME+".jars/bin/test").exists(), is(false));
+                    });
+                });
+                
+                context("called with a jar name that is installed", () -> {
+                    
+                    beforeEach(() -> {
+                        runJar("./target/jarinstaller-0.1.0-SNAPSHOT.jar", "install", "target/test.jar");
+                        stdout.set(runJar("./target/jarinstaller-0.1.0-SNAPSHOT.jar", "uninstall" , "test.jar"));
                     });
                     
                     it("should say that it is removing the jar file", () -> {

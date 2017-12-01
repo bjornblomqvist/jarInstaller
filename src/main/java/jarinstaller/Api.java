@@ -3,6 +3,7 @@ package jarinstaller;
 import jarinstaller.impl.Utils;
 import jarinstaller.impl.Utils.NameAndVersion;
 import static jarinstaller.impl.Utils.getBinDir;
+import static jarinstaller.impl.Utils.getJarFileNameFor;
 import static jarinstaller.impl.Utils.getJarsDir;
 import static jarinstaller.impl.Utils.getNameAndVersion;
 import java.io.ByteArrayOutputStream;
@@ -26,29 +27,41 @@ public class Api {
     }
     
     public static boolean unInstall(Path jarPath, PrintStream printStream) throws JarInstallerException {
-        if (!jarPath.toString().endsWith(".jar")) {
-            throw new JarInstallerException("Could not find jar to uninstall");
-        }
-        
-        File targetDir = getJarsDir();
-        File targetBinDir = getBinDir();
-        Path targetPath = targetDir.toPath().resolve(jarPath.getFileName());
-        
-        NameAndVersion nameAndVersion = getNameAndVersion(jarPath.toString());
-        
-        String targetBashScript = targetBinDir.toPath().resolve(nameAndVersion.name).toString();
-        
-        if (!Files.exists(targetPath)) {
-            printStream.println("There is no " + jarPath.getFileName() + " in ~/.jars/jars/");
-            return false;
-        }
-        
         try {
-            printStream.println("Removing ~/.jars/jars/" + jarPath.getFileName());
-            Files.delete(targetPath);
+            String scriptName = "";
+            String jarName = "";
+
+            if (!jarPath.toString().endsWith(".jar")) {
+                scriptName = jarPath.getFileName().toString();
+                if (!Files.exists(getBinDir().toPath().resolve(scriptName))) {
+                    System.out.println("There is no " + scriptName + " in ~/.jars/bin/");
+                    return false;
+                }
+                jarName = getJarFileNameFor(scriptName);
+            } else {
+                jarName = jarPath.getFileName().toString();
+                NameAndVersion nameAndVersion = getNameAndVersion(jarPath.toString());
+                scriptName = nameAndVersion.name;
+            }
+
+            Path targetPath = getJarsDir().toPath().resolve(new String(jarName));
+            Path targetBashScript = getBinDir().toPath().resolve(scriptName);
+
+            if (!Files.exists(targetPath) && !Files.exists(targetBashScript)) {
+                printStream.println("There is no " + jarName + " in ~/.jars/jars/ and no " + scriptName + " in ~/.jars/bin/");
+                return false;
+            }
             
-            printStream.println("Removing ~/.jars/bin/" + Paths.get(targetBashScript).getFileName());
-            Files.delete(Paths.get(targetBashScript));
+            if (Files.exists(targetPath)) {
+                printStream.println("Removing ~/.jars/jars/" + jarName);
+                Files.delete(targetPath);
+            }
+        
+            if (Files.exists(targetBashScript)) {
+                printStream.println("Removing ~/.jars/bin/" + scriptName);
+                Files.delete(targetBashScript);
+            }
+            
         } catch (IOException ioex) {
             throw new JarInstallerException(ioex);
         }

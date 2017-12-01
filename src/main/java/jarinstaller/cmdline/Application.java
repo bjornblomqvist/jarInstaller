@@ -5,17 +5,17 @@ import jarinstaller.JarInstallerException;
 import jarinstaller.cmdline.classpath.DependencyLoader;
 import jarinstaller.impl.Utils.NameAndVersion;
 import static jarinstaller.impl.Utils.getBinDir;
+import static jarinstaller.impl.Utils.getJarFileNameFor;
+import static jarinstaller.impl.Utils.getJarsDir;
 import static jarinstaller.impl.Utils.getNameAndVersion;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import static java.util.regex.Pattern.MULTILINE;
 import joptsimple.OptionParser;
@@ -29,7 +29,7 @@ public class Application {
         
         Inner.main(args);
     }
-    
+
     private static class Inner {
         
         public static void main(String...args) throws JarInstallerException, IOException {
@@ -126,15 +126,13 @@ public class Application {
         }
         
         for (String fileName : fileNames) {
-            String bashScript = new String(Files.readAllBytes(getBinDir().toPath().resolve(fileName)), "UTF-8");
             
-            Matcher matcher = pattern.matcher(bashScript);
-            if (matcher.find()) {
-                String path = matcher.group(1);
-                String jarFileName = new File(path).toPath().getFileName().toString();
+            String jarFileName = getJarFileNameFor(fileName);
+            
+            if (jarFileName != null) {
                 NameAndVersion nameAndVersion = getNameAndVersion(jarFileName);
                 
-                String missingJar = new File(path).exists() ? "" : " (missing jar)";
+                String missingJar = new File(getJarsDir().toPath().resolve(jarFileName).toString()).exists() ? "" : " (missing jar)";
                 String version = nameAndVersion.version.trim().length() == 0 ? "" : " (" + nameAndVersion.version + ")";
                 
                 System.out.println(padRight(fileName, maxLength) + " -> " + jarFileName + missingJar);

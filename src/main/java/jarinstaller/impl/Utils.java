@@ -5,7 +5,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.URISyntaxException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import static java.util.Arrays.asList;
@@ -14,6 +14,7 @@ import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import static java.util.regex.Pattern.MULTILINE;
 
 public class Utils {
 
@@ -51,6 +52,20 @@ public class Utils {
         } else {
             return new NameAndVersion(name.replace(".jar", ""), "");
         }
+    }
+    
+    public static String getJarFileNameFor(String scriptFileName) throws IOException {
+        Pattern pattern = Pattern.compile("JARINSTALLER_JAR_PATH=(.*)$", MULTILINE);
+        
+        String bashScript = new String(Files.readAllBytes(getBinDir().toPath().resolve(scriptFileName)), "UTF-8");
+            
+        Matcher matcher = pattern.matcher(bashScript);
+        if (matcher.find()) {
+            String path = matcher.group(1);
+            return new File(path).toPath().getFileName().toString();
+        }
+        
+        return null;
     }
     
     public static File getJarsDir() {
