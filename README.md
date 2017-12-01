@@ -24,7 +24,10 @@ from inside the main method to install it.
 
 ## Using the command line tool
 
-    jarinstaller install a-runnable.jar
+    $ jarinstaller install filetransfer-1.0.jar
+
+    Copied filetransfer-1.0.jar to ~/.jars/jars/filetransfer-1.0.jar
+    Created bash script ~/.jars/bin/filetransfer
     
 ## Install the command line tool
 
