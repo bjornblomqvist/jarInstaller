@@ -332,7 +332,7 @@ public class ApiTest {
                 it("should throw an exception", () -> {
                     Exception exception = null;
                     try {
-                        Api.install(null);
+                        Api.install();
                     } catch (Exception ex) {
                         exception = ex;
                     }

@@ -1,13 +1,9 @@
 package jarinstaller.cmdline;
 
-import static jarinstaller.Api.*;
 import jarinstaller.JarInstallerException;
 import jarinstaller.cmdline.classpath.DependencyLoader;
 import jarinstaller.impl.Utils.NameAndVersion;
-import static jarinstaller.impl.Utils.getBinDir;
-import static jarinstaller.impl.Utils.getJarFileNameFor;
-import static jarinstaller.impl.Utils.getJarsDir;
-import static jarinstaller.impl.Utils.getNameAndVersion;
+import static jarinstaller.impl.Utils.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;

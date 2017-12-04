@@ -9,15 +9,28 @@ Once a jar has been installed it will be as easy to run as any other program.
 
 ## Using the library
 	
-You can create a self installing jar by including the library and using its API
-from inside the main method to install it.
+You can create a self installing jar as simple as seen below.
 
     import static jarinstaller.Api.*;
-    
+
     public class Application {
-        public static void main(String...args) {
+        public static void main(String...args) throws JarInstallerException {
+            if (args.length == 0) {
+                if (isInstalled()) {
+                    System.out.println("Call with --uninstall to uninstall");
+                } else {
+                    System.out.println("Call with --install to install");
+                }
+
+                return;
+            }
+
             if (args[0].equals("--install")) {
-                install(getJarPathFor(Application.class));
+                install();
+            }
+
+            if (args[0].equals("--uninstall")) {
+                unInstall();
             }
         }
     }

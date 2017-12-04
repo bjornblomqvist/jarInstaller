@@ -1,7 +1,5 @@
 package jarinstaller;
 
-import static jarinstaller.Api.getJarPathFor;
-
 /**
  * Used to test parts of the API that is only relevant from within a jar.
  */
@@ -10,19 +8,19 @@ public class TestMain {
         System.setProperty("user.home", System.getenv("HOME"));
         
         if (args[0].equalsIgnoreCase("install")) {
-            System.out.println(Api.install(getJarPathFor(TestMain.class)));
+            System.out.println(Api.install());
         }
         
         if (args[0].equalsIgnoreCase("unInstall")) {
-            System.out.println(Api.unInstall(getJarPathFor(TestMain.class)));
+            System.out.println(Api.unInstall());
         }
         
         if (args[0].equalsIgnoreCase("isInstalled")) {
-            System.out.println(Api.isInstalled(getJarPathFor(TestMain.class)));
+            System.out.println(Api.isInstalled());
         }
         
         if (args[0].equalsIgnoreCase("isInJarsDirectory")) {
-            System.out.println(Api.isInJarsDirectory(getJarPathFor(TestMain.class)));
+            System.out.println(Api.isRunFromJarsDir());
         }
     }
 }
