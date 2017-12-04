@@ -35,7 +35,26 @@ You can create a self installing jar as simple as seen below.
         }
     }
 
-## Using the command line tool
+## Command line tool
+
+Run without any arguments
+
+    $ jarinstaller
+
+    usage: jarinstaller [--help] [install|uninstall] [jarfile]
+
+    jarinstaller is used to install runnable jars and map them
+    to a command in the path.
+
+       install         installes a jar file
+       uninstall       uninstalles a jar file
+       list            list installed jars
+
+       -h, --help      show help
+       --install-self  installes jarinstaller
+       --version       prints current version
+
+Install a runnable jar
 
     $ jarinstaller install filetransfer-1.0.jar
 
