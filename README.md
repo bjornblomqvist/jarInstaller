@@ -63,8 +63,8 @@ Install a runnable jar
     
 ## Install the command line tool
 
-    curl -OL https://github.com/bjornblomqvist/jarInstaller/releases/download/0.1.0/jarinstaller-0.1.0.jar
-    java -jar jarinstaller-0.1.0.jar --install-self
+    curl -OL https://github.com/bjornblomqvist/jarInstaller/releases/download/0.2.0/jarinstaller-0.2.0.jar
+    java -jar jarinstaller-0.2.0.jar --install-self
     export PATH=$PATH:~/.jars/bin
 
     jarinstaller --help

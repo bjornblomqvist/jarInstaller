@@ -49,7 +49,7 @@ public class ApplicationIT {
                 Variable<String> stdout = new Variable();
                 
                 beforeEach(() -> {
-                    stdout.set(runJar("./target/jarinstaller-0.1.0-SNAPSHOT.jar", ""));
+                    stdout.set(runJar("./target/jarinstaller-0.2.0-SNAPSHOT.jar", ""));
                 });
                 
                 it("should show the help", () -> {
@@ -61,7 +61,7 @@ public class ApplicationIT {
                 Variable<String> stdout = new Variable();
                 
                 beforeEach(() -> {
-                    stdout.set(runJar("./target/jarinstaller-0.1.0-SNAPSHOT.jar", "huphup"));
+                    stdout.set(runJar("./target/jarinstaller-0.2.0-SNAPSHOT.jar", "huphup"));
                 });
                 
                 it("should show the help", () -> {
@@ -78,7 +78,7 @@ public class ApplicationIT {
                 Variable<String> stdout = new Variable();
                 
                 beforeEach(() -> {
-                    stdout.set(runJar("./target/jarinstaller-0.1.0-SNAPSHOT.jar", "--help"));
+                    stdout.set(runJar("./target/jarinstaller-0.2.0-SNAPSHOT.jar", "--help"));
                 });
 
                 it("should show the help", () -> {
@@ -90,7 +90,7 @@ public class ApplicationIT {
                 Variable<String> stdout = new Variable();
                 
                 beforeEach(() -> {
-                    stdout.set(runJar("./target/jarinstaller-0.1.0-SNAPSHOT.jar", "install"));
+                    stdout.set(runJar("./target/jarinstaller-0.2.0-SNAPSHOT.jar", "install"));
                 });
                 
                 it("should print that it needs a jar file path", () -> {
@@ -107,7 +107,7 @@ public class ApplicationIT {
                 Variable<String> stdout = new Variable();
                 
                 beforeEach(() -> {
-                    stdout.set(runJar("./target/jarinstaller-0.1.0-SNAPSHOT.jar", "install", "target/test.jar"));
+                    stdout.set(runJar("./target/jarinstaller-0.2.0-SNAPSHOT.jar", "install", "target/test.jar"));
                 });
                 
                 it("should print that it copied the jar", () -> {
@@ -132,7 +132,7 @@ public class ApplicationIT {
                         Files.write(new File(DUMMY_HOME + ".profile").toPath(), "".getBytes(), StandardOpenOption.TRUNCATE_EXISTING);
                         HashMap<String, String> env = new HashMap();
                         env.put("PATH", "");
-                        stdout.set(runJar("./target/jarinstaller-0.1.0-SNAPSHOT.jar", env, "install", "target/test.jar"));
+                        stdout.set(runJar("./target/jarinstaller-0.2.0-SNAPSHOT.jar", env, "install", "target/test.jar"));
                     });
                     
                     it("should add sippet that adds the path to ~/.profile", () -> {
@@ -146,7 +146,7 @@ public class ApplicationIT {
                         Files.write(new File(DUMMY_HOME + ".profile").toPath(), "".getBytes(), StandardOpenOption.TRUNCATE_EXISTING);
                         HashMap<String, String> env = new HashMap();
                         env.put("PATH", "/.jars/bin");
-                        stdout.set(runJar("./target/jarinstaller-0.1.0-SNAPSHOT.jar", env, "install", "target/test.jar"));
+                        stdout.set(runJar("./target/jarinstaller-0.2.0-SNAPSHOT.jar", env, "install", "target/test.jar"));
                     });
                     
                     it("should not add a sippet to ~/.profile", () -> {
@@ -160,8 +160,8 @@ public class ApplicationIT {
                         Files.write(new File(DUMMY_HOME + ".profile").toPath(), "".getBytes(), StandardOpenOption.TRUNCATE_EXISTING);
                         HashMap<String, String> env = new HashMap();
                         env.put("PATH", "");
-                        stdout.set(runJar("./target/jarinstaller-0.1.0-SNAPSHOT.jar", env, "install", "target/test.jar"));
-                        stdout.set(runJar("./target/jarinstaller-0.1.0-SNAPSHOT.jar", env, "install", "target/test.jar"));
+                        stdout.set(runJar("./target/jarinstaller-0.2.0-SNAPSHOT.jar", env, "install", "target/test.jar"));
+                        stdout.set(runJar("./target/jarinstaller-0.2.0-SNAPSHOT.jar", env, "install", "target/test.jar"));
                     });
                     
                     it("should not add a sippet to ~/.profile", () -> {
@@ -176,11 +176,11 @@ public class ApplicationIT {
                 Variable<String> stdout = new Variable();
                 
                 beforeEach(() -> {
-                    stdout.set(runJar("./target/jarinstaller-0.1.0-SNAPSHOT.jar", "--install-self"));
+                    stdout.set(runJar("./target/jarinstaller-0.2.0-SNAPSHOT.jar", "--install-self"));
                 });
                 
                 it("should print that it copied the jar", () -> {
-                    assertThat(stdout.get(), containsString("Copied self to ~/.jars/jars/jarinstaller-0.1.0-SNAPSHOT.jar"));
+                    assertThat(stdout.get(), containsString("Copied self to ~/.jars/jars/jarinstaller-0.2.0-SNAPSHOT.jar"));
                 });
                
                 it("should print that it created bash script", () -> {
@@ -192,7 +192,7 @@ public class ApplicationIT {
                 }); 
                 
                 it("should add the jar to the jars directory", () -> {
-                   assertThat(DUMMY_HOME+".jars/jars/jarinstaller-0.1.0-SNAPSHOT.jar does not exist", new File(DUMMY_HOME+".jars/jars/jarinstaller-0.1.0-SNAPSHOT.jar").exists(), is(true));
+                   assertThat(DUMMY_HOME+".jars/jars/jarinstaller-0.2.0-SNAPSHOT.jar does not exist", new File(DUMMY_HOME+".jars/jars/jarinstaller-0.2.0-SNAPSHOT.jar").exists(), is(true));
                 });
             });
             
@@ -203,7 +203,7 @@ public class ApplicationIT {
                 
                 context("when called without a jar name", () -> {
                     beforeEach(() -> {
-                        stdout.set(runJar("./target/jarinstaller-0.1.0-SNAPSHOT.jar", "uninstall"));
+                        stdout.set(runJar("./target/jarinstaller-0.2.0-SNAPSHOT.jar", "uninstall"));
                     }); 
                     
                     it("should say that uninstall needs a path", () -> {
@@ -218,7 +218,7 @@ public class ApplicationIT {
                 context("called with a jar name that is not installed", () -> {
                     
                     beforeEach(() -> {
-                        stdout.set(runJar("./target/jarinstaller-0.1.0-SNAPSHOT.jar", "uninstall", "test.jar"));
+                        stdout.set(runJar("./target/jarinstaller-0.2.0-SNAPSHOT.jar", "uninstall", "test.jar"));
                     });
 
                     it("should say that the jar has not been installed", () -> {
@@ -229,7 +229,7 @@ public class ApplicationIT {
                 context("called with a script name that is not installed", () -> {
                     
                     beforeEach(() -> {
-                        stdout.set(runJar("./target/jarinstaller-0.1.0-SNAPSHOT.jar", "uninstall", "test"));
+                        stdout.set(runJar("./target/jarinstaller-0.2.0-SNAPSHOT.jar", "uninstall", "test"));
                     });
 
                     it("should say that there is no such script in bin directory", () -> {
@@ -240,8 +240,8 @@ public class ApplicationIT {
                 context("called with a script name that is installed", () -> {
                     
                     beforeEach(() -> {
-                        runJar("./target/jarinstaller-0.1.0-SNAPSHOT.jar", "install", "target/test.jar");
-                        stdout.set(runJar("./target/jarinstaller-0.1.0-SNAPSHOT.jar", "uninstall" , "test"));
+                        runJar("./target/jarinstaller-0.2.0-SNAPSHOT.jar", "install", "target/test.jar");
+                        stdout.set(runJar("./target/jarinstaller-0.2.0-SNAPSHOT.jar", "uninstall" , "test"));
                     });
                     
                     it("should say that it is removing the jar file", () -> {
@@ -264,8 +264,8 @@ public class ApplicationIT {
                 context("called with a jar name that is installed", () -> {
                     
                     beforeEach(() -> {
-                        runJar("./target/jarinstaller-0.1.0-SNAPSHOT.jar", "install", "target/test.jar");
-                        stdout.set(runJar("./target/jarinstaller-0.1.0-SNAPSHOT.jar", "uninstall" , "test.jar"));
+                        runJar("./target/jarinstaller-0.2.0-SNAPSHOT.jar", "install", "target/test.jar");
+                        stdout.set(runJar("./target/jarinstaller-0.2.0-SNAPSHOT.jar", "uninstall" , "test.jar"));
                     });
                     
                     it("should say that it is removing the jar file", () -> {
@@ -291,11 +291,11 @@ public class ApplicationIT {
                 Variable<String> stdout = new Variable();
                 
                 beforeEach(() -> {
-                    stdout.set(runJar("./target/jarinstaller-0.1.0-SNAPSHOT.jar", "--version"));
+                    stdout.set(runJar("./target/jarinstaller-0.2.0-SNAPSHOT.jar", "--version"));
                 });
                 
                 it("should show the current version", () -> {
-                    assertThat(stdout.get(), containsString("jarinstaller 0.1.0"));
+                    assertThat(stdout.get(), containsString("jarinstaller 0.2.0"));
                 });
             });
             
@@ -306,9 +306,9 @@ public class ApplicationIT {
                 context("there are two jars installed", () -> {
                     
                     beforeEach(() -> {
-                        runJar("./target/jarinstaller-0.1.0-SNAPSHOT.jar", "install", "target/test.jar");
-                        runJar("./target/jarinstaller-0.1.0-SNAPSHOT.jar", "install", "target/test2-1.0.1.jar");
-                        stdout.set(runJar("./target/jarinstaller-0.1.0-SNAPSHOT.jar", "list"));
+                        runJar("./target/jarinstaller-0.2.0-SNAPSHOT.jar", "install", "target/test.jar");
+                        runJar("./target/jarinstaller-0.2.0-SNAPSHOT.jar", "install", "target/test2-1.0.1.jar");
+                        stdout.set(runJar("./target/jarinstaller-0.2.0-SNAPSHOT.jar", "list"));
                     });
                     
                     it("should show the two installed jars", () -> {
