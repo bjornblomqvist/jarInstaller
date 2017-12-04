@@ -151,6 +151,12 @@ public class Api {
         return true;
     }
     
+    /**
+     * Returns true if a jar with the same name can be found in the jars directory
+     * 
+     * @param jarPath
+     * @return 
+     */
     public static boolean isInstalled(Path jarPath) {
         Path targetPath = Utils.getTargetPath(jarPath); 
 
@@ -165,6 +171,12 @@ public class Api {
         return true;
     }
     
+    /**
+     * Returns true if the jar is in the jars directory
+     * 
+     * @param jarPath
+     * @return 
+     */
     public static boolean isInJarsDirectory(Path jarPath) {
         Path targetPath =  Utils.getTargetPath(jarPath); 
 
