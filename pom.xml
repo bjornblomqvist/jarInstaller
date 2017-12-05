@@ -8,6 +8,13 @@
     </description>
     <url>https://github.com/bjornblomqvist/jarInstaller</url>
     
+    <licenses>
+        <license>
+            <name>GNU Lesser General Public License. LGPL3</name>
+            <url>https://www.gnu.org/licenses/lgpl-3.0.en.html</url>
+        </license>
+    </licenses>
+    
     <groupId>se.bjornblomqvist</groupId>
     <artifactId>jarinstaller</artifactId>
     <version>0.2.0</version>
