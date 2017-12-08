@@ -1,12 +1,9 @@
 package jarinstaller.impl;
 
 import jarinstaller.JarInstallerException;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintStream;
+
+import java.awt.*;
+import java.io.*;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -27,7 +24,10 @@ import static java.util.regex.Pattern.MULTILINE;
 public class Utils {
 
     public static Path getTargetPath(Path path) {
-        File targetDir = new File("~/.jars/jars/".replaceFirst("^~", System.getProperty("user.home")));
+        File targetDir = new File(System.getProperty("user.home") + "/.jars/jars/");
+        if (isWindows()) {
+            targetDir = new File(System.getProperty("user.home") + "\\.jars\\jars\\");
+        }
         return targetDir.toPath().resolve(path.getFileName());
     }
     
@@ -64,6 +64,10 @@ public class Utils {
     
     public static String getJarFileNameFor(String scriptFileName) throws IOException {
         Pattern pattern = Pattern.compile("JARINSTALLER_JAR_PATH=(.*)$", MULTILINE);
+
+        if (isWindows()) {
+            pattern = Pattern.compile("JARINSTALLER_JAR_PATH=\"(.*)\"$", MULTILINE);
+        }
         
         String bashScript = new String(Files.readAllBytes(getBinDir().toPath().resolve(scriptFileName)), "UTF-8");
             
@@ -107,7 +111,11 @@ public class Utils {
     public static boolean install(Path jarPath, PrintStream printStream) throws JarInstallerException {
         return install(jarPath, printStream, false);
     }
-    
+
+    public static boolean isWindows() {
+        return System.getProperty("os.name").toLowerCase().contains("windows");
+    }
+
     public static boolean install(Path jarPath, PrintStream printStream, boolean installingSelf) throws JarInstallerException {
         try {
             if (Files.isDirectory(jarPath) || !Files.exists(jarPath)) {
@@ -159,32 +167,83 @@ public class Utils {
             NameAndVersion nameAndVersion = getNameAndVersion(jarPath.toString());
             
             String targetBashScript = targetBinDir.toPath().resolve(nameAndVersion.name).toString();
-            
-            try(FileWriter bashScriptOutputstream = new FileWriter(targetBashScript);) {
-                bashScriptOutputstream.write("#!/bin/bash\n" +
-                "\n" +
-                "export JARINSTALLER_PATH=~/.jars/\n" +
-                "export JARINSTALLER_JAR_PATH=" + targetPath + "\n" +
-                "export JARINSTALLER_SCRIPT_PATH=" + targetBashScript + "\n" +
-                "\n" +
-                "java -jar $JARINSTALLER_JAR_PATH \"$@\"\n");
-            }
 
-            Set<PosixFilePermission> perms = Files.getPosixFilePermissions(Paths.get(targetBashScript));
-            perms.add(PosixFilePermission.OWNER_EXECUTE);
-            Files.setPosixFilePermissions(Paths.get(targetBashScript), perms);
-            
-            printStream.println("Created bash script ~/.jars/bin/" + Paths.get(targetBashScript).getFileName());
+            if (isWindows()) {
+                writeCmdScript(targetBashScript + ".cmd", targetPath, printStream);
+            } else {
+                writeBashScript(targetBashScript, targetPath, printStream);
+            }
         } catch (IOException ioex) {
             throw new JarInstallerException(ioex);
         }
         
         return true;
     }
+
+    private static void writeCmdScript(String targetCmdScript, Path targetPath, PrintStream printStream) throws IOException {
+        try(FileWriter bashScriptOutputstream = new FileWriter(targetCmdScript);) {
+            bashScriptOutputstream.write(
+                "\r\n" +
+                "@echo off\r\n" +
+                "\r\n" +
+                "set JARINSTALLER_PATH=\" " + getJarInstallerDir() + "\"\r\n" +
+                "set JARINSTALLER_JAR_PATH=\"" + targetPath + "\"\r\n" +
+                "set JARINSTALLER_SCRIPT_PATH=\"" + targetCmdScript + "\"\r\n" +
+                "\r\n" +
+                "java -jar %JARINSTALLER_JAR_PATH% %*\r\n" +
+                "exit\r\n"
+            );
+        }
+
+        printStream.println("Created cmd script ~/.jars/bin/" + Paths.get(targetCmdScript).getFileName());
+    }
+
+    private static void writeBashScript(String targetBashScript, Path targetPath, PrintStream printStream) throws IOException {
+        try(FileWriter bashScriptOutputstream = new FileWriter(targetBashScript);) {
+            bashScriptOutputstream.write("#!/bin/bash\n" +
+                "\n" +
+                "export JARINSTALLER_PATH=~/.jars/\n" +
+                "export JARINSTALLER_JAR_PATH=" + targetPath + "\n" +
+                "export JARINSTALLER_SCRIPT_PATH=" + targetBashScript + "\n" +
+                "\n" +
+                "java -jar $JARINSTALLER_JAR_PATH \"$@\"\n");
+        }
+
+        Set<PosixFilePermission> perms = Files.getPosixFilePermissions(Paths.get(targetBashScript));
+        perms.add(PosixFilePermission.OWNER_EXECUTE);
+        Files.setPosixFilePermissions(Paths.get(targetBashScript), perms);
+
+        printStream.println("Created bash script ~/.jars/bin/" + Paths.get(targetBashScript).getFileName());
+    }
     
     
     public static boolean unInstall(Path jarPath) throws JarInstallerException {
         return unInstall(jarPath, System.out);
+    }
+
+    private static void deleteJarOnWindows(Path jarPath) throws IOException {
+        File scriptFile = File.createTempFile("self-destruct", ".bat" );
+
+        try (PrintWriter printWriter = new PrintWriter(new FileWriter(scriptFile))) {
+            printWriter.println("ping -n 1 127.0.0.1 > nul");
+            printWriter.println("DEL /F \"" + jarPath + "\"");
+            printWriter.println("start /b \"\" cmd /c del \"%~f0\"&exit /b");
+        }
+
+        runAndForgetCmd(scriptFile.getAbsolutePath());
+    }
+
+    private static void runAndForgetCmd(String cmdPath) throws IOException {
+        List<String> commands = new ArrayList();
+        commands.addAll(asList("cmd", "/c", "start", "/b"));
+        commands.add(cmdPath.replace("/", "\\"));
+
+        File logFile = File.createTempFile("logfile", ".log" );
+
+        new ProcessBuilder(commands.toArray(new String[commands.size()]))
+            .redirectError(logFile)
+            .redirectOutput(logFile)
+            .start();
     }
     
     public static boolean unInstall(Path jarPath, PrintStream printStream) throws JarInstallerException {
@@ -194,6 +253,11 @@ public class Utils {
 
             if (!jarPath.toString().endsWith(".jar")) {
                 scriptName = jarPath.getFileName().toString();
+
+                if (isWindows()) {
+                    scriptName += ".cmd";
+                }
+
                 if (!Files.exists(getBinDir().toPath().resolve(scriptName))) {
                     System.out.println("There is no " + scriptName + " in ~/.jars/bin/");
                     return false;
@@ -203,6 +267,10 @@ public class Utils {
                 jarName = jarPath.getFileName().toString();
                 NameAndVersion nameAndVersion = getNameAndVersion(jarPath.toString());
                 scriptName = nameAndVersion.name;
+
+                if (isWindows()) {
+                    scriptName += ".cmd";
+                }
             }
 
             Path targetPath = getJarsDir().toPath().resolve(new String(jarName));
@@ -215,12 +283,20 @@ public class Utils {
             
             if (Files.exists(targetPath)) {
                 printStream.println("Removing ~/.jars/jars/" + jarName);
-                Files.delete(targetPath);
+                if (isWindows()) {
+                    deleteJarOnWindows(targetPath);
+                } else {
+                    Files.delete(targetPath);
+                }
             }
         
             if (Files.exists(targetBashScript)) {
                 printStream.println("Removing ~/.jars/bin/" + scriptName);
-                Files.delete(targetBashScript);
+                if (isWindows()) {
+                    deleteJarOnWindows(targetBashScript);
+                } else {
+                    Files.delete(targetBashScript);
+                }
             }
             
         } catch (IOException ioex) {
@@ -246,6 +322,10 @@ public class Utils {
         } catch (URISyntaxException e) {
             throw new JarInstallerException("Failed find to jar", e);
         }
+    }
+
+    public static File getJarInstallerDir() {
+        return new File(System.getProperty("user.home") + "/.jars/");
     }
     
     public static File getJarsDir() {

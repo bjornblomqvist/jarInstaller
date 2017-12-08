@@ -13,7 +13,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
 import static java.util.regex.Pattern.MULTILINE;
+import static java.util.stream.Collectors.toList;
+
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 
@@ -32,7 +36,16 @@ public class Application {
             if (System.getenv("HOME") != null) {
                 System.setProperty("user.home", System.getenv("HOME"));
             }
-            
+
+            if (isWindows()) {
+                if (
+                    !System.getProperty("user.home").toLowerCase().startsWith("c:")
+                        && System.getenv("USERPROFILE").toLowerCase().startsWith("c:")
+                    ) {
+                    System.setProperty("user.home", System.getenv("USERPROFILE"));
+                }
+            }
+
             OptionParser parser = new OptionParser();
             parser.accepts("help");
             parser.accepts("version");

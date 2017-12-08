@@ -6,7 +6,9 @@ package jarinstaller;
 public class TestMain {
     public static void main(String[] args) throws JarInstallerException {
         System.setProperty("user.home", System.getenv("HOME"));
-        
+
+        System.out.println(args[0]);
+
         if (args[0].equalsIgnoreCase("install")) {
             System.out.println(Api.install());
         }

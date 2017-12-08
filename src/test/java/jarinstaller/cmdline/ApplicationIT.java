@@ -17,6 +17,10 @@ import org.junit.runner.RunWith;
 
 @RunWith(Spectrum.class)
 public class ApplicationIT {
+
+    public static boolean isWindows() {
+        return System.getProperty("os.name").toLowerCase().contains("windows");
+    }
     
     {
         String cwd = Paths.get(".").toAbsolutePath().normalize().toString();
@@ -111,19 +115,31 @@ public class ApplicationIT {
                 });
                 
                 it("should print that it copied the jar", () -> {
-                    assertThat(stdout.get(), containsString("Copied target/test.jar to ~/.jars/jars/test.jar"));
+                    assertThat(stdout.get().replace("\\", "/"), containsString("Copied target/test.jar to ~/.jars/jars/test.jar"));
                 });
                
                 it("should print that it created bash script", () -> {
-                    assertThat(stdout.get(), containsString("Created bash script ~/.jars/bin/test"));
+                    if (isWindows()) {
+                        assertThat(stdout.get(), containsString("Created cmd script ~/.jars/bin/test.cmd"));
+                    } else {
+                        assertThat(stdout.get(), containsString("Created bash script ~/.jars/bin/test"));
+                    }
                 });
                 
                 it("should add the jar to the jars directory", () -> {
-                   assertThat(new File(DUMMY_HOME+".jars/jars/test.jar").exists(), is(true));
+                    if (isWindows()) {
+                        Thread.sleep(1_000);
+                    }
+                    assertThat(new File(DUMMY_HOME+".jars/jars/test.jar").exists(), is(true));
                 });
                
                 it("should add script file to bin directory", () -> {
-                   assertThat(new File(DUMMY_HOME+".jars/bin/test").exists(), is(true));
+                    if (isWindows()) {
+                        Thread.sleep(1_000);
+                        assertThat(new File(DUMMY_HOME+".jars/bin/test.cmd").exists(), is(true));
+                    } else {
+                        assertThat(new File(DUMMY_HOME+".jars/bin/test").exists(), is(true));
+                    }
                 }); 
                 
                 context("~/.jars/bin is not in PATH", () -> {
@@ -184,11 +200,19 @@ public class ApplicationIT {
                 });
                
                 it("should print that it created bash script", () -> {
-                    assertThat(stdout.get(), containsString("Created bash script ~/.jars/bin/jarinstaller"));
+                    if (isWindows()) {
+                        assertThat(stdout.get(), containsString("Created cmd script ~/.jars/bin/jarinstaller.cmd"));
+                    } else {
+                        assertThat(stdout.get(), containsString("Created bash script ~/.jars/bin/jarinstaller"));
+                    }
                 });
                 
                 it("should add script file to bin directory", () -> {
-                   assertThat(DUMMY_HOME+".jars/bin/jarinstaller does not exist", new File(DUMMY_HOME+".jars/bin/jarinstaller").exists(), is(true));
+                    if (isWindows()) {
+                        assertThat(DUMMY_HOME+".jars/bin/jarinstaller.cmd does not exist", new File(DUMMY_HOME+".jars/bin/jarinstaller.cmd").exists(), is(true));
+                    } else {
+                        assertThat(DUMMY_HOME+".jars/bin/jarinstaller does not exist", new File(DUMMY_HOME+".jars/bin/jarinstaller").exists(), is(true));
+                    }
                 }); 
                 
                 it("should add the jar to the jars directory", () -> {
@@ -233,7 +257,11 @@ public class ApplicationIT {
                     });
 
                     it("should say that there is no such script in bin directory", () -> {
-                        assertThat(stdout.get(), containsString("There is no test in ~/.jars/bin/"));
+                        if (isWindows()) {
+                            assertThat(stdout.get(), containsString("There is no test.cmd in ~/.jars/bin/"));
+                        } else {
+                            assertThat(stdout.get(), containsString("There is no test in ~/.jars/bin/"));
+                        }
                     });
                 });
 
@@ -249,15 +277,27 @@ public class ApplicationIT {
                     });
                     
                     it("should say that it is removing the bash script", () -> {
-                        assertThat(stdout.get(), containsString("Removing ~/.jars/bin/test"));
+                        if (isWindows()) {
+                            assertThat(stdout.get(), containsString("Removing ~/.jars/bin/test.cmd"));
+                        } else {
+                            assertThat(stdout.get(), containsString("Removing ~/.jars/bin/test"));
+                        }
                     });
                     
                     it("should remove the jar file", () -> {
+                        if (isWindows()) {
+                            Thread.sleep(2_000);
+                        }
                         assertThat(new File(DUMMY_HOME+".jars/jars/test.jar").exists(), is(false));
                     });
                     
                     it("should remove the script file", () -> {
-                        assertThat(new File(DUMMY_HOME+".jars/bin/test").exists(), is(false));
+                        if (isWindows()) {
+                            Thread.sleep(2_000);
+                            assertThat(new File(DUMMY_HOME+".jars/bin/test.cmd").exists(), is(false));
+                        } else {
+                            assertThat(new File(DUMMY_HOME+".jars/bin/test").exists(), is(false));
+                        }
                     });
                 });
                 
@@ -273,15 +313,27 @@ public class ApplicationIT {
                     });
                     
                     it("should say that it is removing the bash script", () -> {
-                        assertThat(stdout.get(), containsString("Removing ~/.jars/bin/test"));
+                        if (isWindows()) {
+                            assertThat(stdout.get(), containsString("Removing ~/.jars/bin/test.cmd"));
+                        } else {
+                            assertThat(stdout.get(), containsString("Removing ~/.jars/bin/test"));
+                        }
                     });
                     
                     it("should remove the jar file", () -> {
+                        if (isWindows()) {
+                            Thread.sleep(1_000);
+                        }
                         assertThat(new File(DUMMY_HOME+".jars/jars/test.jar").exists(), is(false));
                     });
                     
                     it("should remove the script file", () -> {
-                        assertThat(new File(DUMMY_HOME+".jars/bin/test").exists(), is(false));
+                        if (isWindows()) {
+                            Thread.sleep(1_000);
+                            assertThat(new File(DUMMY_HOME + ".jars/bin/test.cmd").exists(), is(false));
+                        } else {
+                            assertThat(new File(DUMMY_HOME + ".jars/bin/test").exists(), is(false));
+                        }
                     });
                 });
             });
@@ -312,8 +364,13 @@ public class ApplicationIT {
                     });
                     
                     it("should show the two installed jars", () -> {
-                        assertThat(stdout.get(), containsString("test  -> test.jar"));
-                        assertThat(stdout.get(), containsString("test2 -> test2-1.0.1.jar"));
+                        if (isWindows()) {
+                            assertThat(stdout.get(), containsString("test.cmd  -> test.jar"));
+                            assertThat(stdout.get(), containsString("test2.cmd -> test2-1.0.1.jar"));
+                        } else {
+                            assertThat(stdout.get(), containsString("test  -> test.jar"));
+                            assertThat(stdout.get(), containsString("test2 -> test2-1.0.1.jar"));
+                        }
                     });
                 });
             });

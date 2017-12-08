@@ -13,6 +13,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
@@ -33,7 +35,7 @@ public class ApiTest {
         commands.add("java");
         commands.add("-jar");
         commands.add(jarPath);
-        commands.addAll(Arrays.asList(args));
+        commands.addAll(asList(args));
         
         ProcessBuilder builder = new ProcessBuilder(commands.toArray(new String[commands.size()]));
         builder.environment().putAll(env);
@@ -66,7 +68,7 @@ public class ApiTest {
         commands.add("-cp");
         commands.add(jarPath);
         commands.add(className);
-        commands.addAll(Arrays.asList(args));
+        commands.addAll(asList(args));
         
         ProcessBuilder builder = new ProcessBuilder(commands.toArray(new String[commands.size()]));
         builder.environment().put("HOME", System.getProperty("user.home"));
@@ -91,13 +93,24 @@ public class ApiTest {
 
         return result;
     }
+
+    public static boolean isWindows() {
+        return System.getProperty("os.name").toLowerCase().contains("windows");
+    }
     
     public static String runScript(String scriptPath, String... args) throws IOException {
         List<String> commands = new ArrayList();
-        commands.add("/bin/bash");
-        commands.add(scriptPath);
-        commands.addAll(Arrays.asList(args));
-        
+
+        if (isWindows()) {
+            commands.addAll(asList("cmd", "/c", "start", "/b"));
+            commands.add(scriptPath.replace("/", "\\") + ".cmd");
+            commands.addAll(asList(args));
+        } else {
+            commands.add("/bin/bash");
+            commands.add(scriptPath);
+            commands.addAll(asList(args));
+        }
+
         ProcessBuilder builder = new ProcessBuilder(commands.toArray(new String[commands.size()]));
         builder.environment().put("HOME", System.getProperty("user.home"));
         Process process = builder.start();
@@ -137,6 +150,14 @@ public class ApiTest {
         } catch (Exception ex) {
             ex.printStackTrace();
         }   
+    }
+
+    public static boolean scriptFileExists(String scriptFilePath) {
+        if (isWindows()) {
+            scriptFilePath += ".cmd";
+        }
+
+        return new File(scriptFilePath).exists();
     }
     
     public static void buildTestJars() throws IOException, InterruptedException {
@@ -217,15 +238,17 @@ public class ApiTest {
                 });
                
                 it("should return true", () -> {
-                   assertThat(result.get(), containsString("true"));
+                    assertThat(result.get(), containsString("true"));
                 });
                 
                 it("should remove the installed jar", () -> {
-                   assertThat(new File(DUMMY_HOME+".jars/jars/test.jar").exists(), is(false));
+                    Thread.sleep(1_000);
+                    assertThat(new File(DUMMY_HOME+".jars/jars/test.jar").exists(), is(false));
                 });
                 
                 it("should remove the shell script", () -> {
-                   assertThat(new File(DUMMY_HOME+".jars/bin/test").exists(), is(false));
+                    Thread.sleep(1_000);
+                    assertThat(scriptFileExists(DUMMY_HOME+".jars/bin/test"), is(false));
                 });
             });
            
@@ -243,11 +266,13 @@ public class ApiTest {
                 });
                 
                 it("should remove the installed jar", () -> {
-                   assertThat(new File(DUMMY_HOME+".jars/jars/test.jar").exists(), is(false));
+                    Thread.sleep(1_000);
+                    assertThat(new File(DUMMY_HOME+".jars/jars/test.jar").exists(), is(false));
                 });
                 
                 it("should remove the shell script", () -> {
-                   assertThat(new File(DUMMY_HOME+".jars/bin/test").exists(), is(false));
+                    Thread.sleep(1_000);
+                    assertThat(scriptFileExists(DUMMY_HOME+".jars/bin/test"), is(false));
                 });
             });
            
@@ -324,7 +349,7 @@ public class ApiTest {
                 });
                
                 it("should add script file to bin directory", () -> {
-                   assertThat(new File(DUMMY_HOME+".jars/bin/test").exists(), is(true));
+                   assertThat(scriptFileExists(DUMMY_HOME+".jars/bin/test"), is(true));
                 });
             });
             
