@@ -1,2 +1,6 @@
 language: java
-script: mvn verify -B
+install: mvn install -Dgpg.skip -DskipTests=true -Dmaven.javadoc.skip=true -B -V
+script: mvn verify -B -Dgpg.skip
+os:
+  - linux
+  - osx
