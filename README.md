@@ -2,14 +2,20 @@
 
 # jarinstaller
 
-Jar installer is a simple library and command line tool for installing runnable
-jars. It adds the `~/.jars/jars` and puts a bash script in `~/.jars/bin`.
+Jar installer is a library and command line tool for installing runnable jars.
+For each jar installed it puts the jar in  `~/.jars/jars` and creates a bash
+script in `~/.jars/bin` that runs the jar file.
 
-Once a jar has been installed it will be as easy to run as any other program.
+Once a jar has been installed it is as easy to run as any other command line
+program.
+
+**The goal of this project is to make java a good choice for creating command
+line tools.**
 
 ## Using the library
-	
-You can create a self installing jar as simple as seen below.
+
+The library is used to create self installing jars. See the example below for
+how to make your runnable jar self installing.
 
     import static jarinstaller.Api.*;
 
@@ -35,9 +41,31 @@ You can create a self installing jar as simple as seen below.
         }
     }
 
+## Gradle and maven dependency
+
+```xml
+<dependency>
+    <groupId>se.bjornblomqvist</groupId>
+    <artifactId>jarinstaller</artifactId>
+    <version>0.2.0</version>
+</dependency>
+```
+
+```groovy
+compile 'se.bjornblomqvist:jarinstaller:0.2.0'
+```
+
 ## Command line tool
 
-Run without any arguments
+The command line tool is used for installing runnable jars. It can be used to install
+any self contained runnable jar.
+
+    $ jarinstaller install filetransfer-1.0.jar
+
+    Copied filetransfer-1.0.jar to ~/.jars/jars/filetransfer-1.0.jar
+    Created bash script ~/.jars/bin/filetransfer
+ 
+ Run without any arguements to get the help.
 
     $ jarinstaller
 
@@ -54,17 +82,19 @@ Run without any arguments
        --install-self  installes jarinstaller
        --version       prints current version
 
-Install a runnable jar
+## Getting the command line tool
 
-    $ jarinstaller install filetransfer-1.0.jar
+Use the install script or follow the manual instructions.
 
-    Copied filetransfer-1.0.jar to ~/.jars/jars/filetransfer-1.0.jar
-    Created bash script ~/.jars/bin/filetransfer
-    
-## Install the command line tool
+    curl -sSL https://git.io/vbSHD | bash -s stable && export PATH=$PATH:~/.jars/bin
 
-    curl -OL https://github.com/bjornblomqvist/jarInstaller/releases/download/0.2.0/jarinstaller-0.2.0.jar
+Follow these steps to install jarinstaller manually.
+
+    curl -OL http://repo1.maven.org/maven2/se/bjornblomqvist/jarinstaller/0.2.0/jarinstaller-0.2.0.jar
     java -jar jarinstaller-0.2.0.jar --install-self
     export PATH=$PATH:~/.jars/bin
 
-    jarinstaller --help
+## Contribute
+
+Help is welcomed! Please file an issue or pull request.
+
