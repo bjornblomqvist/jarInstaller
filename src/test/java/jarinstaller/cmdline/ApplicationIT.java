@@ -10,6 +10,8 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import static java.nio.file.StandardOpenOption.CREATE;
+import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
 import java.util.HashMap;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -42,7 +44,7 @@ public class ApplicationIT {
                 tryToDelete(new File(DUMMY_HOME + ".jars/bin/"));
                 tryToDelete(new File(DUMMY_HOME + ".jars/"));
                 
-                Files.write(new File(DUMMY_HOME + ".profile").toPath(), "".getBytes(), StandardOpenOption.TRUNCATE_EXISTING);
+                Files.write(new File(DUMMY_HOME + ".profile").toPath(), "".getBytes(), TRUNCATE_EXISTING, CREATE);
             });
             
             context("no params", () -> {
