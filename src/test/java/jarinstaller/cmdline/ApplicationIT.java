@@ -24,6 +24,7 @@ public class ApplicationIT {
         String cwd = Paths.get(".").toAbsolutePath().normalize().toString();
         String ORIGINAL_HOME = System.getProperty("user.home");
         String DUMMY_HOME = cwd + "/target/dummy_home/";
+        String pathToJarInstaller = "./target/jarinstaller-0.3.0.jar";
         
         describe("Application run with", () -> {
             
@@ -51,7 +52,7 @@ public class ApplicationIT {
                 Variable<String> stdout = new Variable();
                 
                 beforeEach(() -> {
-                    stdout.set(runJar("./target/jarinstaller-0.2.0.jar", ""));
+                    stdout.set(runJar(pathToJarInstaller, ""));
                 });
                 
                 it("should show the help", () -> {
@@ -63,7 +64,7 @@ public class ApplicationIT {
                 Variable<String> stdout = new Variable();
                 
                 beforeEach(() -> {
-                    stdout.set(runJar("./target/jarinstaller-0.2.0.jar", "huphup"));
+                    stdout.set(runJar(pathToJarInstaller, "huphup"));
                 });
                 
                 it("should show the help", () -> {
@@ -80,7 +81,7 @@ public class ApplicationIT {
                 Variable<String> stdout = new Variable();
                 
                 beforeEach(() -> {
-                    stdout.set(runJar("./target/jarinstaller-0.2.0.jar", "--help"));
+                    stdout.set(runJar(pathToJarInstaller, "--help"));
                 });
 
                 it("should show the help", () -> {
@@ -92,7 +93,7 @@ public class ApplicationIT {
                 Variable<String> stdout = new Variable();
                 
                 beforeEach(() -> {
-                    stdout.set(runJar("./target/jarinstaller-0.2.0.jar", "install"));
+                    stdout.set(runJar(pathToJarInstaller, "install"));
                 });
                 
                 it("should print that it needs a jar file path", () -> {
@@ -109,7 +110,7 @@ public class ApplicationIT {
                 Variable<String> stdout = new Variable();
                 
                 beforeEach(() -> {
-                    stdout.set(runJar("./target/jarinstaller-0.2.0.jar", "install", "target/test.jar"));
+                    stdout.set(runJar(pathToJarInstaller, "install", "target/test.jar"));
                 });
                 
                 it("should print that it copied the jar", () -> {
@@ -134,7 +135,7 @@ public class ApplicationIT {
                         Files.write(new File(DUMMY_HOME + ".profile").toPath(), "".getBytes(), StandardOpenOption.TRUNCATE_EXISTING);
                         HashMap<String, String> env = new HashMap();
                         env.put("PATH", "");
-                        stdout.set(runJar("./target/jarinstaller-0.2.0.jar", env, "install", "target/test.jar"));
+                        stdout.set(runJar(pathToJarInstaller, env, "install", "target/test.jar"));
                     });
                     
                     it("should add snippet that adds the path to ~/.profile", () -> {
@@ -161,7 +162,7 @@ public class ApplicationIT {
                         Files.write(new File(DUMMY_HOME + ".profile").toPath(), "".getBytes(), StandardOpenOption.TRUNCATE_EXISTING);
                         HashMap<String, String> env = new HashMap();
                         env.put("PATH", "/.jars/bin");
-                        stdout.set(runJar("./target/jarinstaller-0.2.0.jar", env, "install", "target/test.jar"));
+                        stdout.set(runJar(pathToJarInstaller, env, "install", "target/test.jar"));
                     });
                     
                     it("should not add a sippet to ~/.profile", () -> {
@@ -175,8 +176,8 @@ public class ApplicationIT {
                         Files.write(new File(DUMMY_HOME + ".profile").toPath(), "".getBytes(), StandardOpenOption.TRUNCATE_EXISTING);
                         HashMap<String, String> env = new HashMap();
                         env.put("PATH", "");
-                        stdout.set(runJar("./target/jarinstaller-0.2.0.jar", env, "install", "target/test.jar"));
-                        stdout.set(runJar("./target/jarinstaller-0.2.0.jar", env, "install", "target/test.jar"));
+                        stdout.set(runJar(pathToJarInstaller, env, "install", "target/test.jar"));
+                        stdout.set(runJar(pathToJarInstaller, env, "install", "target/test.jar"));
                     });
                     
                     it("should not add a sippet to ~/.profile", () -> {
@@ -191,11 +192,11 @@ public class ApplicationIT {
                 Variable<String> stdout = new Variable();
                 
                 beforeEach(() -> {
-                    stdout.set(runJar("./target/jarinstaller-0.2.0.jar", "--install-self"));
+                    stdout.set(runJar(pathToJarInstaller, "--install-self"));
                 });
                 
                 it("should print that it copied the jar", () -> {
-                    assertThat(stdout.get(), containsString("Copied self to ~/.jars/jars/jarinstaller-0.2.0.jar"));
+                    assertThat(stdout.get(), containsString("Copied self to ~/.jars/jars/jarinstaller-0.3.0.jar"));
                 });
                
                 it("should print that it created bash script", () -> {
@@ -207,7 +208,7 @@ public class ApplicationIT {
                 }); 
                 
                 it("should add the jar to the jars directory", () -> {
-                   assertThat(DUMMY_HOME+".jars/jars/jarinstaller-0.2.0.jar does not exist", new File(DUMMY_HOME+".jars/jars/jarinstaller-0.2.0.jar").exists(), is(true));
+                   assertThat(DUMMY_HOME+".jars/jars/jarinstaller-0.3.0.jar does not exist", new File(DUMMY_HOME+".jars/jars/jarinstaller-0.3.0.jar").exists(), is(true));
                 });
             });
             
@@ -218,7 +219,7 @@ public class ApplicationIT {
                 
                 context("when called without a jar name", () -> {
                     beforeEach(() -> {
-                        stdout.set(runJar("./target/jarinstaller-0.2.0.jar", "uninstall"));
+                        stdout.set(runJar(pathToJarInstaller, "uninstall"));
                     }); 
                     
                     it("should say that uninstall needs a jar path", () -> {
@@ -233,7 +234,7 @@ public class ApplicationIT {
                 context("called with a jar name that is not installed", () -> {
                     
                     beforeEach(() -> {
-                        stdout.set(runJar("./target/jarinstaller-0.2.0.jar", "uninstall", "test.jar"));
+                        stdout.set(runJar(pathToJarInstaller, "uninstall", "test.jar"));
                     });
 
                     it("should say that the jar has not been installed", () -> {
@@ -244,7 +245,7 @@ public class ApplicationIT {
                 context("called with a script name that is not installed", () -> {
                     
                     beforeEach(() -> {
-                        stdout.set(runJar("./target/jarinstaller-0.2.0.jar", "uninstall", "test"));
+                        stdout.set(runJar(pathToJarInstaller, "uninstall", "test"));
                     });
 
                     it("should say that there is no such script in bin directory", () -> {
@@ -255,8 +256,8 @@ public class ApplicationIT {
                 context("called with a script name that is installed", () -> {
                     
                     beforeEach(() -> {
-                        runJar("./target/jarinstaller-0.2.0.jar", "install", "target/test.jar");
-                        stdout.set(runJar("./target/jarinstaller-0.2.0.jar", "uninstall" , "test"));
+                        runJar(pathToJarInstaller, "install", "target/test.jar");
+                        stdout.set(runJar(pathToJarInstaller, "uninstall" , "test"));
                     });
                     
                     it("should say that it is removing the jar file", () -> {
@@ -279,8 +280,8 @@ public class ApplicationIT {
                 context("called with a jar name that is installed", () -> {
                     
                     beforeEach(() -> {
-                        runJar("./target/jarinstaller-0.2.0.jar", "install", "target/test.jar");
-                        stdout.set(runJar("./target/jarinstaller-0.2.0.jar", "uninstall" , "test.jar"));
+                        runJar(pathToJarInstaller, "install", "target/test.jar");
+                        stdout.set(runJar(pathToJarInstaller, "uninstall" , "test.jar"));
                     });
                     
                     it("should say that it is removing the jar file", () -> {
@@ -306,11 +307,11 @@ public class ApplicationIT {
                 Variable<String> stdout = new Variable();
                 
                 beforeEach(() -> {
-                    stdout.set(runJar("./target/jarinstaller-0.2.0.jar", "--version"));
+                    stdout.set(runJar(pathToJarInstaller, "--version"));
                 });
                 
                 it("should show the current version", () -> {
-                    assertThat(stdout.get(), containsString("jarinstaller 0.2.0"));
+                    assertThat(stdout.get(), containsString("jarinstaller 0.3.0"));
                 });
             });
             
@@ -321,9 +322,9 @@ public class ApplicationIT {
                 context("there are two jars installed", () -> {
                     
                     beforeEach(() -> {
-                        runJar("./target/jarinstaller-0.2.0.jar", "install", "target/test.jar");
-                        runJar("./target/jarinstaller-0.2.0.jar", "install", "target/test2-1.0.1.jar");
-                        stdout.set(runJar("./target/jarinstaller-0.2.0.jar", "list"));
+                        runJar(pathToJarInstaller, "install", "target/test.jar");
+                        runJar(pathToJarInstaller, "install", "target/test2-1.0.1.jar");
+                        stdout.set(runJar(pathToJarInstaller, "list"));
                     });
                     
                     it("should show the two installed jars", () -> {
