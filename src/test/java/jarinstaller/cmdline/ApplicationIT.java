@@ -25,7 +25,7 @@ public class ApplicationIT {
         String ORIGINAL_HOME = System.getProperty("user.home");
         String DUMMY_HOME = cwd + "/target/dummy_home/";
         
-        describe("Application", () -> {
+        describe("Application run with", () -> {
             
             beforeAll(() -> {
                 buildTestJars();
@@ -208,7 +208,7 @@ public class ApplicationIT {
                         stdout.set(runJar("./target/jarinstaller-0.2.0.jar", "uninstall"));
                     }); 
                     
-                    it("should say that uninstall needs a path", () -> {
+                    it("should say that uninstall needs a jar path", () -> {
                         assertThat(stdout.get(), containsString("Uninstall action needs a jar file path"));
                     });
                     
