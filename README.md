@@ -12,6 +12,12 @@ program.
 **The goal of this project is to make java a good choice for creating command
 line tools.**
 
+## Short changelog
+
+**0.3.0** 
+
+- Improved logging during install
+
 ## Using the library
 
 The library is used to create self installing jars. See the example below for
@@ -90,8 +96,8 @@ Use the install script or follow the manual instructions.
 
 Follow these steps to install jarinstaller manually.
 
-    curl -OL http://repo1.maven.org/maven2/se/bjornblomqvist/jarinstaller/0.2.0/jarinstaller-0.2.0.jar
-    java -jar jarinstaller-0.2.0.jar --install-self
+    curl -OL http://repo1.maven.org/maven2/se/bjornblomqvist/jarinstaller/0.3.0/jarinstaller-0.3.0.jar
+    java -jar jarinstaller-0.3.0.jar --install-self
     export PATH=$PATH:~/.jars/bin
 
 ## Contribute

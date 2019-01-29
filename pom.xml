@@ -31,7 +31,7 @@
     
     <groupId>se.bjornblomqvist</groupId>
     <artifactId>jarinstaller</artifactId>
-    <version>0.2.0</version>
+    <version>0.3.0</version>
     <packaging>jar</packaging>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
