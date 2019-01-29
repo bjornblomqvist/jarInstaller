@@ -137,9 +137,22 @@ public class ApplicationIT {
                         stdout.set(runJar("./target/jarinstaller-0.2.0.jar", env, "install", "target/test.jar"));
                     });
                     
-                    it("should add sippet that adds the path to ~/.profile", () -> {
+                    it("should add snippet that adds the path to ~/.profile", () -> {
                         String profileContent = new String(Files.readAllBytes(new File(DUMMY_HOME+".profile").toPath()));
                         assertThat(profileContent, containsString("PATH=$PATH:$HOME/.jars/bin # Add jarinstaller bin to PATH"));
+                    });
+
+                    it("should print that it has added a snippet to ~/.profile", () -> {
+                        assertThat(stdout.get(), containsString("Adding \"PATH=$PATH:$HOME/.jars/bin\" to ~/.profile"));
+                    });
+
+                    it("should print out how to add ~/.jars/bin to current path", () -> {
+                        assertThat(stdout.get(), containsString(
+                                "Run the below to add ~/.jars/bin to your current $PATH\n" +
+                                "\n" +
+                                "    export PATH=$PATH:$HOME/.jars/bin\n" +
+                                "\n"
+                        ));
                     });
                 });
                 

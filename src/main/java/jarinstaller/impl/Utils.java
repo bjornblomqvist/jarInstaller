@@ -138,24 +138,6 @@ public class Utils {
                 printStream.println("Copied " + jarPath + " to ~/.jars/jars/" + jarPath.getFileName());
             }
             
-            if (!System.getenv("PATH").contains("/.jars/bin")) {
-                Path profilePath = new File(System.getProperty("user.home") + "/.profile").toPath();
-                boolean hasAlreadyBeenAdded = false;
-                if (Files.exists(profilePath)) {
-                    String profile = new String(Files.readAllBytes(profilePath));
-                    hasAlreadyBeenAdded = profile.contains("/.jars/bin");
-                }
-                if (!hasAlreadyBeenAdded) {
-                    printStream.println("Adding ~/.jars/bin to $PATH. Made changes to ~/.profile");
-                    Files.write(
-                        profilePath,
-                        "\nPATH=$PATH:$HOME/.jars/bin # Add jarinstaller bin to PATH\n".getBytes(),
-                        StandardOpenOption.CREATE,
-                        StandardOpenOption.APPEND
-                    );
-                }
-            }
-            
             NameAndVersion nameAndVersion = getNameAndVersion(jarPath.toString());
             
             String targetBashScript = targetBinDir.toPath().resolve(nameAndVersion.name).toString();
@@ -175,6 +157,29 @@ public class Utils {
             Files.setPosixFilePermissions(Paths.get(targetBashScript), perms);
             
             printStream.println("Created bash script ~/.jars/bin/" + Paths.get(targetBashScript).getFileName());
+
+            if (!System.getenv("PATH").contains("/.jars/bin")) {
+                Path profilePath = new File(System.getProperty("user.home") + "/.profile").toPath();
+                boolean hasAlreadyBeenAdded = false;
+                if (Files.exists(profilePath)) {
+                    String profile = new String(Files.readAllBytes(profilePath));
+                    hasAlreadyBeenAdded = profile.contains("/.jars/bin");
+                }
+                if (!hasAlreadyBeenAdded) {
+                    printStream.println("Adding \"PATH=$PATH:$HOME/.jars/bin\" to ~/.profile");
+                    Files.write(
+                            profilePath,
+                            "\nPATH=$PATH:$HOME/.jars/bin # Add jarinstaller bin to PATH\n".getBytes(),
+                            StandardOpenOption.CREATE,
+                            StandardOpenOption.APPEND
+                    );
+                }
+
+                System.out.println("Run the below to add ~/.jars/bin to your current $PATH\n" +
+                                   "\n" +
+                                   "    export PATH=$PATH:$HOME/.jars/bin\n" +
+                                   "\n");
+            }
         } catch (IOException ioex) {
             throw new JarInstallerException(ioex);
         }
