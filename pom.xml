@@ -59,7 +59,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>jarinstaller.cmdline.Application</mainClass>
+                            <mainClass>jarinstaller.cmdline.InitClass</mainClass>
                         </manifest>
                         <manifestEntries>
                             <App-version>${project.version}</App-version>

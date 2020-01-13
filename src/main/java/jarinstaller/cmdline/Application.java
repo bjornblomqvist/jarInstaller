@@ -1,13 +1,11 @@
 package jarinstaller.cmdline;
 
 import jarinstaller.JarInstallerException;
-import jarinstaller.cmdline.classpath.DependencyLoader;
 import jarinstaller.impl.Utils.NameAndVersion;
 import static jarinstaller.impl.Utils.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,91 +16,81 @@ import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 
 public class Application {
-    
-    public static void main(String...args) throws JarInstallerException, IOException, URISyntaxException {
-        
-        DependencyLoader.init();
-        
-        Inner.main(args);
-    }
 
-    private static class Inner {
-        
-        public static void main(String...args) throws JarInstallerException, IOException {
-            if (System.getenv("HOME") != null) {
-                System.setProperty("user.home", System.getenv("HOME"));
-            }
-            
-            OptionParser parser = new OptionParser();
-            parser.accepts("help");
-            parser.accepts("version");
-            parser.accepts("h");
-            parser.accepts("install-self");
+    public static void main(String[] args) throws JarInstallerException, IOException {
+        if (System.getenv("HOME") != null) {
+            System.setProperty("user.home", System.getenv("HOME"));
+        }
 
-            OptionSet optionSet;
+        OptionParser parser = new OptionParser();
+        parser.accepts("help");
+        parser.accepts("version");
+        parser.accepts("h");
+        parser.accepts("install-self");
 
-            try {
-                optionSet = parser.parse(args);
-            } catch (joptsimple.OptionException e) {
-                System.err.println("\n" + e.getMessage()+"\n");
-                System.err.println("Use --help to find out how to use autotest.\n");
-                return;
-            }
+        OptionSet optionSet;
 
-            if (optionSet.has("h") || optionSet.has("help")) {
-                printHelp();
+        try {
+            optionSet = parser.parse(args);
+        } catch (joptsimple.OptionException e) {
+            System.err.println("\n" + e.getMessage()+"\n");
+            System.err.println("Use --help to find out how to use autotest.\n");
+            return;
+        }
 
-                return;
-            }
-            
-            if (optionSet.has("version")) {
-                printVersion();
+        if (optionSet.has("h") || optionSet.has("help")) {
+            printHelp();
 
-                return;
-            }
-            
-            if (optionSet.has("install-self")) {
-                installSelf();
-                return;
-            }
+            return;
+        }
 
-            List<String> nonOptions = (List<String>) new ArrayList(optionSet.nonOptionArguments());
-            nonOptions.removeIf((o) -> o == null || o.trim().isEmpty());
-            if (nonOptions.isEmpty()) {            
-                printHelp();
-                return;
-            }
+        if (optionSet.has("version")) {
+            printVersion();
 
-            if (nonOptions.get(0).equals("install")) {
-                if (nonOptions.size() == 1) {
-                    System.err.println(
+            return;
+        }
+
+        if (optionSet.has("install-self")) {
+            installSelf();
+            return;
+        }
+
+        List<String> nonOptions = (List<String>) new ArrayList(optionSet.nonOptionArguments());
+        nonOptions.removeIf((o) -> o == null || o.trim().isEmpty());
+        if (nonOptions.isEmpty()) {
+            printHelp();
+            return;
+        }
+
+        if (nonOptions.get(0).equals("install")) {
+            if (nonOptions.size() == 1) {
+                System.err.println(
                         "Install action needs a jar file path.\n" +
                         "\n" +
                         "Like this: jarinstaller install path/to/your.jar\n"
-                    );
+                );
 
-                    return;
-                }
+                return;
+            }
 
-                install(new File(nonOptions.get(1)).toPath(), System.out);
-            } else if (nonOptions.get(0).equals("uninstall")) {
-                if (nonOptions.size() == 1) {
-                    System.err.println(
+            install(new File(nonOptions.get(1)).toPath(), System.out);
+        } else if (nonOptions.get(0).equals("uninstall")) {
+            if (nonOptions.size() == 1) {
+                System.err.println(
                         "Uninstall action needs a jar file path.\n" +
                         "\n" +
                         "Like this: jarinstaller uninstall path/to/your.jar\n"
-                    );
+                );
 
-                    return;
-                }
-
-                unInstall(new File(nonOptions.get(1)).toPath(), System.out);
-            } else if (nonOptions.get(0).equals("list")) {
-                listJars();
-            } else {
-                System.out.println("\nERROR! unknown param, \"" + nonOptions.get(0) + "\"");
-                printHelp();
+                return;
             }
+
+            unInstall(new File(nonOptions.get(1)).toPath(), System.out);
+        } else if (nonOptions.get(0).equals("list")) {
+            listJars();
+        } else {
+            System.out.println("\nERROR! unknown param, \"" + nonOptions.get(0) + "\"");
+            printHelp();
         }
     }
     

@@ -2,12 +2,17 @@ package jarinstaller.cmdline.classpath;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.net.URLDecoder;
 import static java.util.Arrays.asList;
+
+import java.net.URLStreamHandler;
+import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashSet;
@@ -16,16 +21,59 @@ import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
+import jarinstaller.JarInstallerException;
+
 public class DependencyLoader {
 
-    public static void init() throws IOException, URISyntaxException {
-        URLClassLoader toTweek = (URLClassLoader) DependencyLoader.class.getClassLoader();
-        Handler.setup(toTweek);
-        List<String> paths = getResourceListing(toTweek, "dependencies/");
-        for (String path : paths) {
+    public static Path getJarPathFor(Class mainClass) throws JarInstallerException {
+        try {
+            return new File(mainClass.getProtectionDomain().getCodeSource().getLocation().toURI().getPath()).toPath();
+        } catch (URISyntaxException e) {
+            throw new JarInstallerException("Failed find to jar", e);
+        }
+    }
+
+    public static Path getJarPathAtBottomOfStack() throws JarInstallerException {
+        try {
+            StackTraceElement[] elements = Thread.currentThread().getStackTrace();
+            return getJarPathFor(Class.forName(elements[elements.length -1].getClassName()));
+        } catch (ClassNotFoundException ex) {
+            throw new JarInstallerException(ex);
+        }
+    }
+
+    public static void init(String className, String[] arguments) throws IOException, URISyntaxException {
+        Handler.setup(DependencyLoader.class.getClassLoader());
+        List<URL> urls = new ArrayList<>();
+
+        List<String> paths = getResourceListing(DependencyLoader.class.getClassLoader(), "dependencies/");
+            for (String path : paths) {
             if (path.endsWith(".jar")) {
-                addURL(toTweek, "classpath:dependencies/" + path);
+                urls.add(new URL("classpath:dependencies/" + path));
             }
+        }
+
+        try {
+            Path path = getJarPathAtBottomOfStack();
+            urls.add(path.toUri().toURL());
+
+            URLClassLoader urlClassLoader = new URLClassLoader(urls.toArray(new URL[0]), DependencyLoader.class.getClassLoader().getParent());
+            Handler.setup(urlClassLoader);
+
+            Class klass = urlClassLoader.loadClass(className);
+            for(Method method : klass.getMethods()) {
+                if (method.getName().equals("main")) {
+                    method.invoke(klass, new Object[] {arguments});
+                }
+            }
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        } catch (JarInstallerException e) {
+            e.printStackTrace();
         }
     }
     
@@ -40,7 +88,7 @@ public class DependencyLoader {
         }
     }
     
-    private static List<String> getResourceListing(URLClassLoader urlClassLoader, String path) throws URISyntaxException, IOException {
+    private static List<String> getResourceListing(ClassLoader urlClassLoader, String path) throws URISyntaxException, IOException {
       URL dirURL = urlClassLoader.getResource(path);
       if (dirURL != null && dirURL.getProtocol().equals("file")) {
         /* A file path: easy enough */

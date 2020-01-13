@@ -37,7 +37,9 @@ public class Handler extends URLStreamHandler {
         }
 
         public InputStream getInputStream() throws IOException {
-            String resourcePath = url.toString().replaceAll("^classpath:(/|)", "");
+            String resourcePath = url.toString()
+                                     .replaceAll("^classpath:(/|)", "")
+                                     .replaceAll("#runtime$", "");
             InputStream inputStream = Handler.classLoader.getResourceAsStream(resourcePath);
 
             if(inputStream == null) {
