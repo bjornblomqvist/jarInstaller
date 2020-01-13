@@ -30,7 +30,7 @@ public class ApiTest {
     public static String runJar(String jarPath, Map<String, String> env, String... args) throws IOException {
         
         List<String> commands = new ArrayList();
-        commands.add("java");
+        commands.add(System.getenv("JAVA_HOME") + "/bin/java");
         commands.add("-jar");
         commands.add(jarPath);
         commands.addAll(Arrays.asList(args));
