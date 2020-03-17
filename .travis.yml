@@ -1,7 +1,36 @@
 language: java
-install: mvn install -Dgpg.skip -DskipTests=true -Dmaven.javadoc.skip=true -B -V
-script: mvn verify -B -Dgpg.skip
-osx_image: xcode9.3
-os:
-  - linux
-  - osx
+install: mvn install -Dgpg.skip -DskipTests=true -Dmaven.javadoc.skip=true -B -V -X
+script: mvn verify -B -Dgpg.skip -X
+
+jobs:
+  include:
+    - os: linux
+      jdk: openjdk8
+    - os: linux
+      jdk: openjdk9
+    - os: linux
+      jdk: openjdk10
+    - os: linux
+      jdk: openjdk11
+    - os: linux
+      jdk: openjdk12
+    - os: linux
+      jdk: openjdk13
+    - os: macos
+      jdk: openjdk8
+      osx_image: xcode9.3
+    - os: macos
+      jdk: openjdk9
+      osx_image: xcode9.4
+    - os: macos
+      jdk: openjdk10
+      osx_image: xcode9.4
+    - os: macos
+      jdk: openjdk11
+      osx_image: xcode9.4
+    - os: macos
+      jdk: openjdk12
+      osx_image: xcode9.4
+    - os: macos
+      jdk: openjdk13
+      osx_image: xcode9.4
